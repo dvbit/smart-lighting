@@ -1,0 +1,138 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Area Selection",
+        "description": "Select the Home Assistant area to configure.",
+        "data": {
+          "area_id": "Area"
+        }
+      },
+      "sensors": {
+        "title": "Sensors",
+        "description": "Select sensors for this area.",
+        "data": {
+          "motion_sensors": "Motion sensors",
+          "occupancy_sensor": "Occupancy sensor",
+          "lux_sensor": "Lux sensor",
+          "lux_threshold": "Lux threshold"
+        }
+      },
+      "actuators": {
+        "title": "Actuators",
+        "description": "Configure light and relay entities. At least one is required.",
+        "data": {
+          "bulb_entity": "Smart bulbs (optional)",
+          "relay_entity": "Relay switch (optional)",
+          "soft_bulb_entity": "Soft profile bulbs (optional)",
+          "soft_relay_entity": "Soft profile relay (optional)",
+          "suspend_entity": "Suspend entity (optional)",
+          "monitored_switch": "Monitored switch (optional)",
+          "click_time_window": "Click time window"
+        }
+      },
+      "timings": {
+        "title": "Timings",
+        "description": "Configure timeouts and warning settings.",
+        "data": {
+          "occupancy_timeout": "Occupancy timeout",
+          "failsafe_timeout": "Failsafe timeout",
+          "adaptive_window": "Adaptive window",
+          "adaptive_threshold": "Adaptive threshold",
+          "adaptive_multiplier": "Adaptive multiplier",
+          "adaptive_max_factor": "Adaptive max factor",
+          "perm_override_timeout": "Permanent override timeout",
+          "lux_hysteresis_pct": "Lux high threshold %",
+          "lux_hysteresis_time": "Lux hysteresis time",
+          "temp_override_timeout": "Temp override timeout (0=never)",
+          "warning_dim_pct": "Warning dim %",
+          "warning_dim_duration": "Warning dim duration",
+          "no_motion_timeout": "No-motion fallback timeout"
+        }
+      },
+      "profiles": {
+        "title": "Brightness Profiles",
+        "description": "Configure normal and soft brightness profiles.",
+        "data": {
+          "brightness_normal": "Normal brightness",
+          "brightness_soft": "Soft brightness",
+          "profile_mode": "Soft profile trigger",
+          "soft_time_start": "Soft time start",
+          "soft_time_end": "Soft time end",
+          "soft_entity": "Soft profile entity"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "At least one actuator (bulb or relay) is required."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Area Selection",
+        "description": "Change the configured area.",
+        "data": {
+          "area_id": "Area"
+        }
+      },
+      "sensors": {
+        "title": "Sensors",
+        "description": "Update sensors for this area.",
+        "data": {
+          "motion_sensors": "Motion sensors",
+          "occupancy_sensor": "Occupancy sensor",
+          "lux_sensor": "Lux sensor",
+          "lux_threshold": "Lux threshold"
+        }
+      },
+      "actuators": {
+        "title": "Actuators",
+        "description": "Update light and relay entities.",
+        "data": {
+          "bulb_entity": "Smart bulbs (optional)",
+          "relay_entity": "Relay switch (optional)",
+          "soft_bulb_entity": "Soft profile bulbs (optional)",
+          "soft_relay_entity": "Soft profile relay (optional)",
+          "suspend_entity": "Suspend entity (optional)",
+          "monitored_switch": "Monitored switch (optional)",
+          "click_time_window": "Click time window"
+        }
+      },
+      "timings": {
+        "title": "Timings",
+        "description": "Update timeouts and warning settings.",
+        "data": {
+          "occupancy_timeout": "Occupancy timeout",
+          "failsafe_timeout": "Failsafe timeout",
+          "adaptive_window": "Adaptive window",
+          "adaptive_threshold": "Adaptive threshold",
+          "adaptive_multiplier": "Adaptive multiplier",
+          "adaptive_max_factor": "Adaptive max factor",
+          "perm_override_timeout": "Permanent override timeout",
+          "lux_hysteresis_pct": "Lux high threshold %",
+          "lux_hysteresis_time": "Lux hysteresis time",
+          "temp_override_timeout": "Temp override timeout (0=never)",
+          "warning_dim_pct": "Warning dim %",
+          "warning_dim_duration": "Warning dim duration",
+          "no_motion_timeout": "No-motion fallback timeout"
+        }
+      },
+      "profiles": {
+        "title": "Brightness Profiles",
+        "description": "Update brightness profiles.",
+        "data": {
+          "brightness_normal": "Normal brightness",
+          "brightness_soft": "Soft brightness",
+          "profile_mode": "Soft profile trigger",
+          "soft_time_start": "Soft time start",
+          "soft_time_end": "Soft time end",
+          "soft_entity": "Soft profile entity"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "At least one actuator (bulb or relay) is required."
+    }
+  }
+}

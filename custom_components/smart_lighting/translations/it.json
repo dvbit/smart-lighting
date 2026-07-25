@@ -1,0 +1,138 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Selezione area",
+        "description": "Seleziona l'area Home Assistant da configurare.",
+        "data": {
+          "area_id": "Area"
+        }
+      },
+      "sensors": {
+        "title": "Sensori",
+        "description": "Seleziona i sensori per questa area.",
+        "data": {
+          "motion_sensors": "Sensori di movimento",
+          "occupancy_sensor": "Sensore di presenza",
+          "lux_sensor": "Sensore di luminosità",
+          "lux_threshold": "Soglia luminosità"
+        }
+      },
+      "actuators": {
+        "title": "Attuatori",
+        "description": "Configura le entità luce e relè. Almeno uno è obbligatorio.",
+        "data": {
+          "bulb_entity": "Lampadine smart (opzionale)",
+          "relay_entity": "Relè (opzionale)",
+          "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
+          "soft_relay_entity": "Relè profilo soffuso (opzionale)",
+          "suspend_entity": "Entità sospensione (opzionale)",
+          "monitored_switch": "Interruttore monitorato (opzionale)",
+          "click_time_window": "Finestra temporale click"
+        }
+      },
+      "timings": {
+        "title": "Temporizzazioni",
+        "description": "Configura timeout e impostazioni avviso.",
+        "data": {
+          "occupancy_timeout": "Timeout presenza",
+          "failsafe_timeout": "Timeout di sicurezza",
+          "adaptive_window": "Finestra adattiva",
+          "adaptive_threshold": "Soglia adattiva",
+          "adaptive_multiplier": "Moltiplicatore adattivo",
+          "adaptive_max_factor": "Fattore massimo adattivo",
+          "perm_override_timeout": "Timeout override permanente",
+          "lux_hysteresis_pct": "Soglia lux alta %",
+          "lux_hysteresis_time": "Tempo isteresi lux",
+          "temp_override_timeout": "Timeout override temporaneo (0=mai)",
+          "warning_dim_pct": "Attenuazione avviso %",
+          "warning_dim_duration": "Durata attenuazione",
+          "no_motion_timeout": "Timeout senza movimento"
+        }
+      },
+      "profiles": {
+        "title": "Profili luminosità",
+        "description": "Configura i profili di luminosità normale e soffusa.",
+        "data": {
+          "brightness_normal": "Luminosità normale",
+          "brightness_soft": "Luminosità soffusa",
+          "profile_mode": "Attivazione profilo soffuso",
+          "soft_time_start": "Inizio fascia soffusa",
+          "soft_time_end": "Fine fascia soffusa",
+          "soft_entity": "Entità profilo soffuso"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "È necessario almeno un attuatore (lampadina o relè)."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Selezione area",
+        "description": "Cambia l'area configurata.",
+        "data": {
+          "area_id": "Area"
+        }
+      },
+      "sensors": {
+        "title": "Sensori",
+        "description": "Aggiorna i sensori per questa area.",
+        "data": {
+          "motion_sensors": "Sensori di movimento",
+          "occupancy_sensor": "Sensore di presenza",
+          "lux_sensor": "Sensore di luminosità",
+          "lux_threshold": "Soglia luminosità"
+        }
+      },
+      "actuators": {
+        "title": "Attuatori",
+        "description": "Aggiorna le entità luce e relè.",
+        "data": {
+          "bulb_entity": "Lampadine smart (opzionale)",
+          "relay_entity": "Relè (opzionale)",
+          "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
+          "soft_relay_entity": "Relè profilo soffuso (opzionale)",
+          "suspend_entity": "Entità sospensione (opzionale)",
+          "monitored_switch": "Interruttore monitorato (opzionale)",
+          "click_time_window": "Finestra temporale click"
+        }
+      },
+      "timings": {
+        "title": "Temporizzazioni",
+        "description": "Aggiorna timeout e impostazioni avviso.",
+        "data": {
+          "occupancy_timeout": "Timeout presenza",
+          "failsafe_timeout": "Timeout di sicurezza",
+          "adaptive_window": "Finestra adattiva",
+          "adaptive_threshold": "Soglia adattiva",
+          "adaptive_multiplier": "Moltiplicatore adattivo",
+          "adaptive_max_factor": "Fattore massimo adattivo",
+          "perm_override_timeout": "Timeout override permanente",
+          "lux_hysteresis_pct": "Soglia lux alta %",
+          "lux_hysteresis_time": "Tempo isteresi lux",
+          "temp_override_timeout": "Timeout override temporaneo (0=mai)",
+          "warning_dim_pct": "Attenuazione avviso %",
+          "warning_dim_duration": "Durata attenuazione",
+          "no_motion_timeout": "Timeout senza movimento"
+        }
+      },
+      "profiles": {
+        "title": "Profili luminosità",
+        "description": "Aggiorna i profili di luminosità.",
+        "data": {
+          "brightness_normal": "Luminosità normale",
+          "brightness_soft": "Luminosità soffusa",
+          "profile_mode": "Attivazione profilo soffuso",
+          "soft_time_start": "Inizio fascia soffusa",
+          "soft_time_end": "Fine fascia soffusa",
+          "soft_entity": "Entità profilo soffuso"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "È necessario almeno un attuatore (lampadina o relè)."
+    }
+  }
+}

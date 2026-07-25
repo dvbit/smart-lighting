@@ -1,0 +1,138 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Selección de área",
+        "description": "Seleccione el área de Home Assistant a configurar.",
+        "data": {
+          "area_id": "Área"
+        }
+      },
+      "sensors": {
+        "title": "Sensores",
+        "description": "Seleccione los sensores para esta área.",
+        "data": {
+          "motion_sensors": "Sensores de movimiento",
+          "occupancy_sensor": "Sensor de ocupación",
+          "lux_sensor": "Sensor de luminosidad",
+          "lux_threshold": "Umbral de luminosidad"
+        }
+      },
+      "actuators": {
+        "title": "Actuadores",
+        "description": "Configure las entidades de luz y relé. Se requiere al menos uno.",
+        "data": {
+          "bulb_entity": "Bombillas inteligentes (opcional)",
+          "relay_entity": "Relé (opcional)",
+          "soft_bulb_entity": "Bombillas perfil suave (opcional)",
+          "soft_relay_entity": "Relé perfil suave (opcional)",
+          "suspend_entity": "Entidad de suspensión (opcional)",
+          "monitored_switch": "Interruptor monitoreado (opcional)",
+          "click_time_window": "Ventana temporal clic"
+        }
+      },
+      "timings": {
+        "title": "Temporizaciones",
+        "description": "Configure los tiempos de espera y advertencia.",
+        "data": {
+          "occupancy_timeout": "Tiempo de espera de ocupación",
+          "failsafe_timeout": "Tiempo de espera de seguridad",
+          "adaptive_window": "Ventana adaptativa",
+          "adaptive_threshold": "Umbral adaptativo",
+          "adaptive_multiplier": "Multiplicador adaptativo",
+          "adaptive_max_factor": "Factor máximo adaptativo",
+          "perm_override_timeout": "Tiempo de espera override permanente",
+          "lux_hysteresis_pct": "Umbral lux alto %",
+          "lux_hysteresis_time": "Tiempo histéresis lux",
+          "temp_override_timeout": "Timeout override temporal (0=nunca)",
+          "warning_dim_pct": "Atenuación advertencia %",
+          "warning_dim_duration": "Duración atenuación",
+          "no_motion_timeout": "Timeout sin movimiento"
+        }
+      },
+      "profiles": {
+        "title": "Perfiles de brillo",
+        "description": "Configure los perfiles de brillo normal y suave.",
+        "data": {
+          "brightness_normal": "Brillo normal",
+          "brightness_soft": "Brillo suave",
+          "profile_mode": "Activación del perfil suave",
+          "soft_time_start": "Inicio franja suave",
+          "soft_time_end": "Fin franja suave",
+          "soft_entity": "Entidad perfil suave"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Se requiere al menos un actuador (bombilla o relé)."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Selección de área",
+        "description": "Cambiar el área configurada.",
+        "data": {
+          "area_id": "Área"
+        }
+      },
+      "sensors": {
+        "title": "Sensores",
+        "description": "Actualizar sensores.",
+        "data": {
+          "motion_sensors": "Sensores de movimiento",
+          "occupancy_sensor": "Sensor de ocupación",
+          "lux_sensor": "Sensor de luminosidad",
+          "lux_threshold": "Umbral de luminosidad"
+        }
+      },
+      "actuators": {
+        "title": "Actuadores",
+        "description": "Actualizar entidades.",
+        "data": {
+          "bulb_entity": "Bombillas inteligentes (opcional)",
+          "relay_entity": "Relé (opcional)",
+          "soft_bulb_entity": "Bombillas perfil suave (opcional)",
+          "soft_relay_entity": "Relé perfil suave (opcional)",
+          "suspend_entity": "Entidad de suspensión (opcional)",
+          "monitored_switch": "Interruptor monitoreado (opcional)",
+          "click_time_window": "Ventana temporal clic"
+        }
+      },
+      "timings": {
+        "title": "Temporizaciones",
+        "description": "Actualizar tiempos.",
+        "data": {
+          "occupancy_timeout": "Tiempo de espera de ocupación",
+          "failsafe_timeout": "Tiempo de espera de seguridad",
+          "adaptive_window": "Ventana adaptativa",
+          "adaptive_threshold": "Umbral adaptativo",
+          "adaptive_multiplier": "Multiplicador adaptativo",
+          "adaptive_max_factor": "Factor máximo adaptativo",
+          "perm_override_timeout": "Tiempo de espera override permanente",
+          "lux_hysteresis_pct": "Umbral lux alto %",
+          "lux_hysteresis_time": "Tiempo histéresis lux",
+          "temp_override_timeout": "Timeout override temporal (0=nunca)",
+          "warning_dim_pct": "Atenuación advertencia %",
+          "warning_dim_duration": "Duración atenuación",
+          "no_motion_timeout": "Timeout sin movimiento"
+        }
+      },
+      "profiles": {
+        "title": "Perfiles de brillo",
+        "description": "Actualizar perfiles.",
+        "data": {
+          "brightness_normal": "Brillo normal",
+          "brightness_soft": "Brillo suave",
+          "profile_mode": "Activación del perfil suave",
+          "soft_time_start": "Inicio franja suave",
+          "soft_time_end": "Fin franja suave",
+          "soft_entity": "Entidad perfil suave"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Se requiere al menos un actuador (bombilla o relé)."
+    }
+  }
+}
