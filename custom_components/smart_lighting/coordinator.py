@@ -50,13 +50,12 @@ from .const import (
     CONF_BRIGHTNESS_NORMAL,
     CONF_BRIGHTNESS_SOFT,
     CONF_BULB_ENTITY,
-    CONF_CLICK_TIME_WINDOW,
     CONF_FAILSAFE_TIMEOUT,
     CONF_LUX_HYSTERESIS_PCT,
     CONF_LUX_HYSTERESIS_TIME,
     CONF_LUX_SENSOR,
     CONF_LUX_THRESHOLD,
-    CONF_MONITORED_SWITCH,
+    CONF_PHYSICAL_INTERACTION_SENSOR,
     CONF_MOTION_SENSORS,
     CONF_OCCUPANCY_SENSOR,
     CONF_OCCUPANCY_TIMEOUT,
@@ -79,7 +78,6 @@ from .const import (
     DEFAULT_ADAPTIVE_WINDOW,
     DEFAULT_BRIGHTNESS_NORMAL,
     DEFAULT_BRIGHTNESS_SOFT,
-    DEFAULT_CLICK_TIME_WINDOW,
     DEFAULT_FAILSAFE_TIMEOUT,
     DEFAULT_LUX_HYSTERESIS_PCT,
     DEFAULT_LUX_HYSTERESIS_TIME,
@@ -188,14 +186,9 @@ class SmartLightingCoordinator:
         self._suspended: bool = False
         self._pre_suspend_state: str | None = None
 
-        # ── Embedded click detection [Spec §10] ──────────────────
-        self._click_count: int = 0
-        self._click_timer: asyncio.TimerHandle | None = None
-        self._last_interaction_type: str = "Unknown"
-        self._last_acting_user: str = "Unknown"
-        self._click_time_window: float = float(
-            config.get(CONF_CLICK_TIME_WINDOW, DEFAULT_CLICK_TIME_WINDOW)
-        )
+        # ── Whodidit physical interaction [Spec §10] ────────────────
+        # Listens to whodidit binary_sensor for click detection
+        self._last_click_count: int = 0
 
         # ── Temp override timer [Spec §10] ───────────────────────
         self._temp_override_timer: asyncio.TimerHandle | None = None
@@ -351,28 +344,6 @@ class SmartLightingCoordinator:
         total = self._runtime_warning_dim_duration
         elapsed = self.hass.loop.time() - self._warning_start
         return max(0.0, round(total - elapsed, 1))
-
-    # ── Click detection properties [Spec §10] ────────────────────
-
-    @property
-    def click_count(self) -> int:
-        """Return current click count in active window."""
-        return self._click_count
-
-    @property
-    def interaction_type(self) -> str:
-        """Return last interaction type: Physical/Automation/UI."""
-        return self._last_interaction_type
-
-    @property
-    def acting_user(self) -> str:
-        """Return last acting user or 'Physical'."""
-        return self._last_acting_user
-
-    @property
-    def click_time_window(self) -> float:
-        """Return configured click time window."""
-        return self._click_time_window
 
     # ── Adaptive timeout properties ──────────────────────────────
 
@@ -597,7 +568,7 @@ class SmartLightingCoordinator:
         if lux:
             entities_to_track.append(lux)
 
-        interaction = self.config.get(CONF_MONITORED_SWITCH)
+        interaction = self.config.get(CONF_PHYSICAL_INTERACTION_SENSOR)
         if interaction:
             entities_to_track.append(interaction)
 
@@ -632,7 +603,7 @@ class SmartLightingCoordinator:
         motion_sensors = self.config.get(CONF_MOTION_SENSORS, [])
         occupancy = self.config.get(CONF_OCCUPANCY_SENSOR)
         lux = self.config.get(CONF_LUX_SENSOR)
-        monitored = self.config.get(CONF_MONITORED_SWITCH)
+        monitored = self.config.get(CONF_PHYSICAL_INTERACTION_SENSOR)
         suspend = self.config.get(CONF_SUSPEND_ENTITY)
 
         # Suspend entity is always handled, even when suspended [Spec §15]
@@ -651,7 +622,7 @@ class SmartLightingCoordinator:
         elif entity_id == lux:
             self._handle_lux(new_state)
         elif entity_id == monitored:
-            self._handle_monitored_switch(event)
+            self._handle_physical_interaction(new_state, old_state)
 
     # ── Motion Handling [Spec §7] ────────────────────────────────
 
@@ -845,110 +816,44 @@ class SmartLightingCoordinator:
     # ── Manual Override [Spec §10] ───────────────────────────────
 
     @callback
-    def _handle_monitored_switch(self, event: Event) -> None:
-        """Handle monitored switch state change [Spec §10].
+    def _handle_physical_interaction(
+        self, new_state: State, old_state: State | None
+    ) -> None:
+        """Handle whodidit physical interaction sensor [Spec §10].
 
-        Analyzes the event context to determine the interaction type:
-        - context.user_id is None → Physical (wall switch)
-        - context.user_id is set → UI or Automation
-        Only Physical interactions are counted for override detection.
-        Click counting uses a time window to distinguish single/double press.
+        The whodidit binary_sensor is ON during the click window
+        and OFF when it expires. On the ON→OFF transition, the
+        click_count attribute contains the total accumulated clicks.
+        1 click → temp override, 2 clicks → perm override.
         """
-        new_state: State | None = event.data.get("new_state")
-        old_state: State | None = event.data.get("old_state")
-        if new_state is None or old_state is None:
-            _LOGGER.debug("Monitored switch: missing old/new state, ignoring")
+        if old_state is None:
             return
 
-        # Skip if state didn't actually change
-        if new_state.state == old_state.state:
-            _LOGGER.debug(
-                "Monitored switch: state unchanged (%s), ignoring",
-                new_state.state,
-            )
+        # Only react to ON → OFF transition (click window expired)
+        if old_state.state != STATE_ON or new_state.state != "off":
             return
 
-        # Determine interaction type from context [Spec §10]
-        context = new_state.context
-        user_id = context.user_id if context else None
-        parent_id = context.parent_id if context else None
+        # Read click count from attribute
+        try:
+            clicks = int(new_state.attributes.get("click_count", 0))
+        except (ValueError, TypeError):
+            clicks = 0
 
-        _LOGGER.debug(
-            "Monitored switch event: %s → %s, context.user_id=%s, "
-            "context.parent_id=%s",
-            old_state.state, new_state.state, user_id, parent_id,
-        )
-
-        if user_id is None:
-            # No user_id → Physical interaction (wall switch)
-            interaction_type = "Physical"
-            acting_user = "Physical"
-        else:
-            # Has user_id → check if it's a person or automation
-            if parent_id is not None:
-                interaction_type = "Automation"
-                acting_user = str(user_id)
-            else:
-                interaction_type = "UI"
-                acting_user = str(user_id)
-
-        # Update exposed state
-        self._last_interaction_type = interaction_type
-        self._last_acting_user = acting_user
-
-        _LOGGER.info(
-            "Monitored switch: type=%s, user=%s, current_clicks=%d",
-            interaction_type, acting_user, self._click_count,
-        )
-
-        # Only count Physical interactions for override [Spec §10]
-        if interaction_type != "Physical":
-            _LOGGER.debug("Non-physical interaction, ignoring for override")
-            self._notify_update()
+        if clicks == 0:
             return
 
-        # ── Click counting with time window ──────────────────
-        self._click_count += 1
-        _LOGGER.info(
-            "Physical click counted: total=%d, window=%.1fs",
-            self._click_count, self._click_time_window,
-        )
-
-        # Cancel previous click timer
-        if self._click_timer is not None:
-            self._click_timer.cancel()
-            self._click_timer = None
-
-        # Start new timer: after window expires, evaluate clicks
-        self._click_timer = self.hass.loop.call_later(
-            self._click_time_window,
-            lambda: self.hass.async_create_task(
-                self._async_evaluate_clicks()
-            ),
-        )
-        self._notify_update()
-
-    async def _async_evaluate_clicks(self) -> None:
-        """Evaluate accumulated click count after time window [Spec §10].
-
-        1 click → temp override (single press)
-        2 clicks → perm override (double press)
-        3+ clicks → ignored (accidental)
-        """
-        clicks = self._click_count
-        self._click_count = 0
-        self._click_timer = None
+        self._last_click_count = clicks
 
         _LOGGER.info(
-            "Click window expired: %d clicks, state=%s, is_on=%s",
+            "Whodidit physical interaction: %d clicks, state=%s, is_on=%s",
             clicks, self._state, self._is_on,
         )
 
         if clicks == 1:
-            _LOGGER.info("Executing single press → temp override")
+            _LOGGER.info("Single click → temp override")
             self._handle_single_press()
         elif clicks == 2:
-            _LOGGER.info("Executing double press → perm override")
+            _LOGGER.info("Double click → perm override")
             self._handle_double_press()
         else:
             _LOGGER.debug("Ignoring %d clicks (accidental)", clicks)
@@ -1399,11 +1304,6 @@ class SmartLightingCoordinator:
         self._cancel_perm_override_timer()
         self._cancel_temp_override_timer()
         self._cancel_no_motion_timer()
-        # Cancel click detection window
-        if self._click_timer is not None:
-            self._click_timer.cancel()
-            self._click_timer = None
-        self._click_count = 0
         self._lux_high_since = None
 
     # ── No-motion fallback [Spec §16] ────────────────────────────

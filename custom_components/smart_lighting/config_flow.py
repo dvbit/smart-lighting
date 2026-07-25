@@ -41,8 +41,7 @@ from .const import (
     CONF_BRIGHTNESS_SOFT,
     CONF_BULB_ENTITY,
     CONF_FAILSAFE_TIMEOUT,
-    CONF_CLICK_TIME_WINDOW,
-    CONF_MONITORED_SWITCH,
+    CONF_PHYSICAL_INTERACTION_SENSOR,
     CONF_LUX_HYSTERESIS_PCT,
     CONF_LUX_HYSTERESIS_TIME,
     CONF_LUX_SENSOR,
@@ -72,7 +71,6 @@ from .const import (
     DEFAULT_FAILSAFE_TIMEOUT,
     DEFAULT_LUX_HYSTERESIS_PCT,
     DEFAULT_LUX_HYSTERESIS_TIME,
-    DEFAULT_CLICK_TIME_WINDOW,
     DEFAULT_LUX_THRESHOLD,
     DEFAULT_OCCUPANCY_TIMEOUT,
     DEFAULT_PERM_OVERRIDE_TIMEOUT,
@@ -257,19 +255,10 @@ class SmartLightingConfigFlow(ConfigFlow, domain=DOMAIN):
                         )
                     ),
                     vol.Optional(
-                        CONF_MONITORED_SWITCH
+                        CONF_PHYSICAL_INTERACTION_SENSOR
                     ): selector.EntitySelector(
                         selector.EntitySelectorConfig(
-                            include_entities=lights + switches,
-                        )
-                    ),
-                    vol.Optional(
-                        CONF_CLICK_TIME_WINDOW,
-                        default=DEFAULT_CLICK_TIME_WINDOW,
-                    ): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0.5, max=5.0, step=0.1,
-                            unit_of_measurement="s", mode="box",
+                            domain=["binary_sensor"],
                         )
                     ),
                     vol.Optional(
@@ -651,40 +640,26 @@ class SmartLightingOptionsFlow(OptionsFlow):
                 selector.EntitySelectorConfig(include_entities=switches)
             )
 
-        # Monitored switch for click detection [Spec §10]
-        if self._cur(CONF_MONITORED_SWITCH):
+        # Whodidit physical interaction sensor [Spec §10]
+        if self._cur(CONF_PHYSICAL_INTERACTION_SENSOR):
             schema_dict[
                 vol.Optional(
-                    CONF_MONITORED_SWITCH,
-                    default=self._cur(CONF_MONITORED_SWITCH),
+                    CONF_PHYSICAL_INTERACTION_SENSOR,
+                    default=self._cur(CONF_PHYSICAL_INTERACTION_SENSOR),
                 )
             ] = selector.EntitySelector(
                 selector.EntitySelectorConfig(
-                    include_entities=lights + switches
+                    domain=["binary_sensor"]
                 )
             )
         else:
             schema_dict[
-                vol.Optional(CONF_MONITORED_SWITCH)
+                vol.Optional(CONF_PHYSICAL_INTERACTION_SENSOR)
             ] = selector.EntitySelector(
                 selector.EntitySelectorConfig(
-                    include_entities=lights + switches
+                    domain=["binary_sensor"]
                 )
             )
-
-        schema_dict[
-            vol.Optional(
-                CONF_CLICK_TIME_WINDOW,
-                default=self._cur(
-                    CONF_CLICK_TIME_WINDOW, DEFAULT_CLICK_TIME_WINDOW
-                ),
-            )
-        ] = selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.5, max=5.0, step=0.1,
-                unit_of_measurement="s", mode="box",
-            )
-        )
 
         # Soft profile alternate actuators (optional) [Spec §12]
         if self._cur(CONF_SOFT_BULB_ENTITY):

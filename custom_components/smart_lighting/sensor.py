@@ -72,23 +72,6 @@ async def async_setup_entry(
             coordinator, entry, area_name, "activation_count",
             "Activation Count", "activation_count",
         ),
-        # Click detection sensors [Spec §10]
-        SmartLightingTextSensor(
-            coordinator, entry, area_name, "click_count",
-            "Click Count", "click_count",
-        ),
-        SmartLightingTextSensor(
-            coordinator, entry, area_name, "interaction_type",
-            "Interaction Type", "interaction_type",
-        ),
-        SmartLightingTextSensor(
-            coordinator, entry, area_name, "acting_user",
-            "Acting User", "acting_user",
-        ),
-        SmartLightingTextSensor(
-            coordinator, entry, area_name, "click_time_window",
-            "Click Time Window", "click_time_window",
-        ),
         # Lux mirror sensor [Spec §9]
         SmartLightingLuxSensor(coordinator, entry, area_name),
     ]
@@ -293,50 +276,6 @@ class SmartLightingAdaptiveSensor(SensorEntity):
     def _async_tick(self, _now=None) -> None:
         """Update sensor value periodically."""
         self.async_write_ha_state()
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle coordinator state change."""
-        self.async_write_ha_state()
-
-
-class SmartLightingTextSensor(SensorEntity):
-    """Sensor exposing text/numeric values from coordinator.
-
-    Used for click detection entities: click_count, interaction_type,
-    acting_user, click_time_window [Spec §10].
-    """
-
-    _attr_has_entity_name = True
-    _attr_should_poll = False
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-
-    def __init__(
-        self,
-        coordinator,
-        entry: ConfigEntry,
-        area_name: str,
-        key: str,
-        name: str,
-        prop_name: str,
-    ) -> None:
-        """Initialize text sensor."""
-        self._coordinator = coordinator
-        self._prop_name = prop_name
-
-        self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
-        self._attr_name = name
-        self._attr_device_info = coordinator.device_info
-
-    @property
-    def native_value(self) -> str:
-        """Return current value from coordinator."""
-        val = getattr(self._coordinator, self._prop_name, "Unknown")
-        return str(val)
-
-    async def async_added_to_hass(self) -> None:
-        """Register for coordinator updates."""
-        self._coordinator.set_update_callback(self._handle_coordinator_update)
 
     @callback
     def _handle_coordinator_update(self) -> None:

@@ -27,8 +27,7 @@
           "soft_bulb_entity": "Bombillas perfil suave (opcional)",
           "soft_relay_entity": "Relé perfil suave (opcional)",
           "suspend_entity": "Entidad de suspensión (opcional)",
-          "monitored_switch": "Interruptor monitoreado (opcional)",
-          "click_time_window": "Ventana temporal clic"
+          "physical_interaction_sensor": "Sensor interacción física (opcional)"
         }
       },
       "timings": {
@@ -95,8 +94,7 @@
           "soft_bulb_entity": "Bombillas perfil suave (opcional)",
           "soft_relay_entity": "Relé perfil suave (opcional)",
           "suspend_entity": "Entidad de suspensión (opcional)",
-          "monitored_switch": "Interruptor monitoreado (opcional)",
-          "click_time_window": "Ventana temporal clic"
+          "physical_interaction_sensor": "Sensor interacción física (opcional)"
         }
       },
       "timings": {

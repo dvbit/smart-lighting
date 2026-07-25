@@ -21,10 +21,8 @@ CONF_SOFT_BULB_ENTITY = "soft_bulb_entity"  # optional alt bulb for soft profile
 CONF_SOFT_RELAY_ENTITY = "soft_relay_entity"  # optional alt relay for soft profile
 
 # ── Config keys: Manual Override [Spec §10] ──────────────────────
-CONF_MONITORED_SWITCH = "monitored_switch"
-# Switch/light entity to monitor for physical click detection [Spec §10]
-CONF_CLICK_TIME_WINDOW = "click_time_window"
-# Time window in seconds for counting clicks [Spec §10]
+CONF_PHYSICAL_INTERACTION_SENSOR = "physical_interaction_sensor"
+# Whodidit binary_sensor: ON during click window, click_count attribute
 
 # ── Config keys: Timeouts [Spec §3, §8] ──────────────────────────
 CONF_OCCUPANCY_TIMEOUT = "occupancy_timeout"  # [Spec §3] OFF trigger
@@ -83,7 +81,6 @@ DEFAULT_WARNING_DIM_DURATION = 10     # 10 seconds dimmed [Spec §6]
 DEFAULT_NO_MOTION_TIMEOUT = 1800      # 30 min fallback [Spec §16]
 DEFAULT_BRIGHTNESS_NORMAL = 255        # max [Spec §5]
 DEFAULT_BRIGHTNESS_SOFT = 100          # dimmed [Spec §5]
-DEFAULT_CLICK_TIME_WINDOW = 1.5       # seconds for click detection [Spec §10]
 DEFAULT_SOFT_TIME_START = "20:00"      # [Spec §12]
 DEFAULT_SOFT_TIME_END = "08:00"        # [Spec §12]
 

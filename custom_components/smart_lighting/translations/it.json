@@ -27,8 +27,7 @@
           "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
           "soft_relay_entity": "Relè profilo soffuso (opzionale)",
           "suspend_entity": "Entità sospensione (opzionale)",
-          "monitored_switch": "Interruttore monitorato (opzionale)",
-          "click_time_window": "Finestra temporale click"
+          "physical_interaction_sensor": "Sensore interazione fisica (opzionale)"
         }
       },
       "timings": {
@@ -95,8 +94,7 @@
           "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
           "soft_relay_entity": "Relè profilo soffuso (opzionale)",
           "suspend_entity": "Entità sospensione (opzionale)",
-          "monitored_switch": "Interruttore monitorato (opzionale)",
-          "click_time_window": "Finestra temporale click"
+          "physical_interaction_sensor": "Sensore interazione fisica (opzionale)"
         }
       },
       "timings": {

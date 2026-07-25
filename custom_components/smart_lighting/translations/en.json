@@ -27,8 +27,7 @@
           "soft_bulb_entity": "Soft profile bulbs (optional)",
           "soft_relay_entity": "Soft profile relay (optional)",
           "suspend_entity": "Suspend entity (optional)",
-          "monitored_switch": "Monitored switch (optional)",
-          "click_time_window": "Click time window"
+          "physical_interaction_sensor": "Physical interaction sensor (optional)"
         }
       },
       "timings": {
@@ -95,8 +94,7 @@
           "soft_bulb_entity": "Soft profile bulbs (optional)",
           "soft_relay_entity": "Soft profile relay (optional)",
           "suspend_entity": "Suspend entity (optional)",
-          "monitored_switch": "Monitored switch (optional)",
-          "click_time_window": "Click time window"
+          "physical_interaction_sensor": "Physical interaction sensor (optional)"
         }
       },
       "timings": {

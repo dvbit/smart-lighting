@@ -27,8 +27,7 @@
           "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
           "soft_relay_entity": "Relais profil tamisé (optionnel)",
           "suspend_entity": "Entité de suspension (optionnel)",
-          "monitored_switch": "Interrupteur surveillé (optionnel)",
-          "click_time_window": "Fenêtre temporelle clic"
+          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
         }
       },
       "timings": {
@@ -95,8 +94,7 @@
           "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
           "soft_relay_entity": "Relais profil tamisé (optionnel)",
           "suspend_entity": "Entité de suspension (optionnel)",
-          "monitored_switch": "Interrupteur surveillé (optionnel)",
-          "click_time_window": "Fenêtre temporelle clic"
+          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
         }
       },
       "timings": {
