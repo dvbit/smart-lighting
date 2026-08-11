@@ -275,6 +275,22 @@ class SmartLightingCoordinator:
             self.config.get(CONF_LUX_THRESHOLD, DEFAULT_LUX_THRESHOLD)
         )
 
+        # Determine if soft actuators are actively in use
+        soft_bulbs = self._to_list(self.config.get(CONF_SOFT_BULB_ENTITY))
+        soft_relay = self.config.get(CONF_SOFT_RELAY_ENTITY)
+        soft_actuators_configured = bool(soft_bulbs or soft_relay)
+        soft_actuators_active = (
+            soft_actuators_configured and self._is_soft_profile_active()
+        )
+
+        # Determine if soft time range is currently active
+        suspend_entity = self.config.get(CONF_SUSPEND_ENTITY)
+        suspend_active = False
+        if suspend_entity:
+            s = self.hass.states.get(suspend_entity)
+            if s is not None:
+                suspend_active = s.state == STATE_ON
+
         return {
             "smart_lighting_state": self._state,
             "override_active": self._state
@@ -287,6 +303,9 @@ class SmartLightingCoordinator:
                 lux_value >= threshold if lux_value is not None else False
             ),
             "profile": self.current_profile,
+            "soft_actuators_active": soft_actuators_active,
+            "suspended": self._suspended,
+            "suspend_active": suspend_active,
             # Source entity IDs for card more-info popups
             "motion_sensors": self.config.get(CONF_MOTION_SENSORS, []),
             "occupancy_sensor": self.config.get(CONF_OCCUPANCY_SENSOR, ""),
