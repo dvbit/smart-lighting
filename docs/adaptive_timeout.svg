@@ -1,0 +1,221 @@
+<svg viewBox="0 0 1300 860" xmlns="http://www.w3.org/2000/svg" style="background:#0d1117;font-family:'Segoe UI',sans-serif">
+<defs>
+  <marker id="ab" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#42a5f5"/></marker>
+  <marker id="ag" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#66bb6a"/></marker>
+  <marker id="ao" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#ffa726"/></marker>
+  <marker id="ar" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#f85149"/></marker>
+  <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="glow2"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+
+<!-- Title -->
+<text x="650" y="32" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700">Adaptive Timeout — Mechanism Detail</text>
+<text x="650" y="52" text-anchor="middle" fill="#484f58" font-size="11">Prevents excessive on/off cycling in high-traffic areas</text>
+
+<!-- ═══ FORMULA BOX ═══ -->
+<rect x="30" y="68" width="560" height="130" rx="10" fill="#161b22" stroke="#1f6feb" stroke-width="1.5"/>
+<text x="310" y="90" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700">Parameters</text>
+<text x="50" y="112" fill="#8b949e" font-size="11" font-weight="700">adaptive_window</text>
+<text x="230" y="112" fill="#6e7681" font-size="11">Rolling time window to count activations (default 600s)</text>
+<text x="50" y="130" fill="#8b949e" font-size="11" font-weight="700">adaptive_threshold</text>
+<text x="230" y="130" fill="#6e7681" font-size="11">Max activations before extending (default 3)</text>
+<text x="50" y="148" fill="#8b949e" font-size="11" font-weight="700">adaptive_multiplier</text>
+<text x="230" y="148" fill="#6e7681" font-size="11">Factor per activation over threshold (default 1.5)</text>
+<text x="50" y="166" fill="#8b949e" font-size="11" font-weight="700">adaptive_max_factor</text>
+<text x="230" y="166" fill="#6e7681" font-size="11">Maximum multiplier cap (default 4.0)</text>
+<text x="50" y="186" fill="#42a5f5" font-size="12" font-weight="700">effective_timeout = min(occupancy_timeout × multiplier^excess, occupancy_timeout × adaptive_max_factor)</text>
+
+<!-- ═══ FORMULA BOX right: decay ═══ -->
+<rect x="710" y="68" width="560" height="130" rx="10" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+<text x="990" y="90" text-anchor="middle" fill="#f85149" font-size="13" font-weight="700">Decay Rule</text>
+<text x="730" y="112" fill="#8b949e" font-size="11">When occupancy_timeout fires naturally (normal exit from ACTIVE)</text>
+<text x="730" y="130" fill="#8b949e" font-size="11">→ traffic has calmed → factor decays toward 1.0</text>
+<text x="730" y="150" fill="#6e7681" font-size="11">Decay: removes oldest activations outside the rolling window</text>
+<text x="730" y="170" fill="#6e7681" font-size="11">Factor recalculated from current window count</text>
+<text x="730" y="190" fill="#f85149" font-size="12" font-weight="700">No decay during override or forced-off (failsafe, suspend)</text>
+
+<!-- ═══ TIMELINE CHART ═══ -->
+<!-- Chart area: x=60..1240, y=230..580  width=1180, height=350 -->
+
+<!-- Chart background -->
+<rect x="60" y="230" width="1180" height="350" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+
+<!-- Y-axis label -->
+<text x="32" y="415" text-anchor="middle" fill="#8b949e" font-size="11" transform="rotate(-90,32,415)">effective_timeout (× base)</text>
+
+<!-- Y-axis gridlines and labels -->
+<!-- y=580: factor=1.0   y=455: factor=2.0   y=330: factor=3.0   y=230: factor=4.0 -->
+<!-- scale: 350px / 3.0 range = 116.7px per factor unit -->
+<line x1="60" y1="580" x2="1240" y2="580" stroke="#21262d" stroke-width="1"/>
+<text x="48" y="584" text-anchor="end" fill="#6e7681" font-size="10">1.0×</text>
+
+<line x1="60" y1="463" x2="1240" y2="463" stroke="#21262d" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="48" y="467" text-anchor="end" fill="#6e7681" font-size="10">2.0×</text>
+
+<line x1="60" y1="346" x2="1240" y2="346" stroke="#21262d" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="48" y="350" text-anchor="end" fill="#6e7681" font-size="10">3.0×</text>
+
+<line x1="60" y1="230" x2="1240" y2="230" stroke="#21262d" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="48" y="234" text-anchor="end" fill="#ffa726" font-size="10">4.0× cap</text>
+
+<!-- X-axis label -->
+<text x="650" y="620" text-anchor="middle" fill="#8b949e" font-size="11">Time →   (each segment = one activation cycle: IDLE→ACTIVE→occupancy_timeout)</text>
+
+<!-- ══ Factor line (stepped) ══
+  Default params: threshold=3, multiplier=1.5, max=4.0, base=300s
+  Activations in window: 0→1→2→3→4→5→6 then decay
+  excess = max(0, count - threshold)
+  factor = min(1.5^excess, 4.0)
+    0 excess → 1.0      y=580
+    1 excess → 1.5      y=580-0.5×116.7=580-58=522
+    2 excess → 2.25     y=580-1.25×116.7=580-146=434
+    3 excess → 3.375    y=580-2.375×116.7=580-277=303
+    4 excess → 4.0(cap) y=230
+    decay: 4→3.375→2.25→1.5→1.0
+  X positions spread across chart width 1180px, ~130px per step
+  x0=60, steps at x=60,190,320,450,580,710,840,970,1100,1220
+-->
+
+<!-- Activation events (vertical tick marks) -->
+<!-- Cycle 1: x=190 act1 count=1 excess=0 factor=1.0 -->
+<!-- Cycle 2: x=320 act2 count=2 excess=0 factor=1.0 -->
+<!-- Cycle 3: x=450 act3 count=3 excess=0 factor=1.0 (threshold reached) -->
+<!-- Cycle 4: x=580 act4 count=4 excess=1 factor=1.5 -->
+<!-- Cycle 5: x=710 act5 count=5 excess=2 factor=2.25 -->
+<!-- Cycle 6: x=840 act6 count=6 excess=3 factor=3.375 -->
+<!-- Cycle 7: x=970 count=7 excess=4 factor=4.0(cap) -->
+<!-- Decay 1: x=1100 oldest drops out, count=6→excess=3 factor=3.375 -->
+<!-- Decay 2: x=1220 count=5→excess=2 factor=2.25 (continues off-chart) -->
+
+<!-- Factor line: stepped polygonal -->
+<polyline points="
+  60,580
+  190,580
+  190,580
+  320,580
+  320,580
+  450,580
+  450,580
+  580,522
+  580,522
+  710,434
+  710,434
+  840,303
+  840,303
+  970,230
+  970,230
+  1100,230
+  1100,303
+  1220,434
+" stroke="#42a5f5" stroke-width="2.5" fill="none" filter="url(#glow)"/>
+
+<!-- Fill area under factor line -->
+<polygon points="
+  60,580
+  190,580
+  320,580
+  450,580
+  580,522
+  710,434
+  840,303
+  970,230
+  1100,230
+  1100,303
+  1220,434
+  1220,580
+  60,580
+" fill="#42a5f5" fill-opacity="0.08"/>
+
+<!-- Cap line -->
+<line x1="60" y1="230" x2="1240" y2="230" stroke="#ffa726" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+<!-- Activation event markers -->
+<!-- x=190 act1 -->
+<line x1="190" y1="580" x2="190" y2="230" stroke="#3fb950" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="190" cy="580" r="5" fill="#3fb950" filter="url(#glow)"/>
+<text x="190" y="600" text-anchor="middle" fill="#3fb950" font-size="9">act.1</text>
+<text x="190" y="612" text-anchor="middle" fill="#6e7681" font-size="8">count=1</text>
+
+<!-- x=320 act2 -->
+<line x1="320" y1="580" x2="320" y2="230" stroke="#3fb950" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="320" cy="580" r="5" fill="#3fb950" filter="url(#glow)"/>
+<text x="320" y="600" text-anchor="middle" fill="#3fb950" font-size="9">act.2</text>
+<text x="320" y="612" text-anchor="middle" fill="#6e7681" font-size="8">count=2</text>
+
+<!-- x=450 act3 (threshold reached) -->
+<line x1="450" y1="580" x2="450" y2="230" stroke="#ffa726" stroke-width="1.5" stroke-dasharray="2,3" opacity="0.7"/>
+<circle cx="450" cy="580" r="6" fill="#ffa726" filter="url(#glow)"/>
+<text x="450" y="600" text-anchor="middle" fill="#ffa726" font-size="9" font-weight="700">act.3</text>
+<text x="450" y="612" text-anchor="middle" fill="#ffa726" font-size="8">threshold!</text>
+
+<!-- x=580 act4 factor=1.5 -->
+<line x1="580" y1="522" x2="580" y2="230" stroke="#42a5f5" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="580" cy="522" r="5" fill="#42a5f5" filter="url(#glow)"/>
+<text x="580" y="600" text-anchor="middle" fill="#42a5f5" font-size="9">act.4</text>
+<text x="580" y="612" text-anchor="middle" fill="#6e7681" font-size="8">×1.5</text>
+
+<!-- x=710 act5 factor=2.25 -->
+<line x1="710" y1="434" x2="710" y2="230" stroke="#42a5f5" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="710" cy="434" r="5" fill="#42a5f5" filter="url(#glow)"/>
+<text x="710" y="600" text-anchor="middle" fill="#42a5f5" font-size="9">act.5</text>
+<text x="710" y="612" text-anchor="middle" fill="#6e7681" font-size="8">×2.25</text>
+
+<!-- x=840 act6 factor=3.375 -->
+<line x1="840" y1="303" x2="840" y2="230" stroke="#42a5f5" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="840" cy="303" r="5" fill="#42a5f5" filter="url(#glow)"/>
+<text x="840" y="600" text-anchor="middle" fill="#42a5f5" font-size="9">act.6</text>
+<text x="840" y="612" text-anchor="middle" fill="#6e7681" font-size="8">×3.38</text>
+
+<!-- x=970 act7 factor=4.0 (cap) -->
+<line x1="970" y1="230" x2="970" y2="230" stroke="#f85149" stroke-width="1" opacity="0.5"/>
+<circle cx="970" cy="230" r="6" fill="#f85149" filter="url(#glow)"/>
+<text x="970" y="600" text-anchor="middle" fill="#f85149" font-size="9" font-weight="700">act.7</text>
+<text x="970" y="612" text-anchor="middle" fill="#f85149" font-size="8">CAP ×4.0</text>
+
+<!-- x=1100 decay: oldest out count=6→factor=3.375 -->
+<line x1="1100" y1="303" x2="1100" y2="580" stroke="#f85149" stroke-width="1" stroke-dasharray="2,4" opacity="0.5"/>
+<circle cx="1100" cy="303" r="5" fill="#f85149"/>
+<text x="1100" y="600" text-anchor="middle" fill="#f85149" font-size="9">decay</text>
+<text x="1100" y="612" text-anchor="middle" fill="#6e7681" font-size="8">×3.38</text>
+
+<!-- x=1220 decay: count=5→factor=2.25 -->
+<circle cx="1220" cy="434" r="5" fill="#f85149"/>
+<text x="1220" y="600" text-anchor="middle" fill="#f85149" font-size="9">decay</text>
+<text x="1220" y="612" text-anchor="middle" fill="#6e7681" font-size="8">×2.25</text>
+
+<!-- Annotations -->
+<!-- "factor=1.0 (normal)" annotation -->
+<rect x="62" y="558" width="118" height="18" rx="3" fill="#0d1117"/>
+<text x="72" y="570" fill="#6e7681" font-size="9">factor=1.0 (normal timeout)</text>
+
+<!-- Cap annotation -->
+<rect x="973" y="232" width="160" height="16" rx="3" fill="#3a0000"/>
+<text x="983" y="243" fill="#ffa726" font-size="9">adaptive_max_factor cap</text>
+
+<!-- Threshold annotation with arrow -->
+<rect x="452" y="500" width="120" height="32" rx="5" fill="#2d1600" stroke="#ffa726" stroke-width="1"/>
+<text x="512" y="515" text-anchor="middle" fill="#ffa726" font-size="9" font-weight="700">threshold reached</text>
+<text x="512" y="528" text-anchor="middle" fill="#6e7681" font-size="9">next activation extends</text>
+
+<!-- Decay zone label -->
+<rect x="1060" y="234" width="170" height="32" rx="5" fill="#3a0000" stroke="#f85149" stroke-width="1"/>
+<text x="1145" y="249" text-anchor="middle" fill="#f85149" font-size="10" font-weight="700">DECAY ZONE</text>
+<text x="1145" y="262" text-anchor="middle" fill="#6e7681" font-size="9">oldest act. leaves window</text>
+
+<!-- Increase zone label -->
+<rect x="592" y="234" width="155" height="32" rx="5" fill="#0c2033" stroke="#42a5f5" stroke-width="1"/>
+<text x="669" y="249" text-anchor="middle" fill="#42a5f5" font-size="10" font-weight="700">INCREASE ZONE</text>
+<text x="669" y="262" text-anchor="middle" fill="#6e7681" font-size="9">count &gt; adaptive_threshold</text>
+
+<!-- Example callout box -->
+<rect x="60" y="630" width="1180" height="100" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="650" y="650" text-anchor="middle" fill="#8b949e" font-size="11" font-weight="700">Example with defaults: occupancy_timeout=300s · adaptive_window=600s · adaptive_threshold=3 · adaptive_multiplier=1.5 · adaptive_max_factor=4.0</text>
+<text x="80" y="672" fill="#6e7681" font-size="10">Activations 1-3:</text><text x="190" y="672" fill="#8b949e" font-size="10">count ≤ threshold → no change → effective_timeout = 300s</text>
+<text x="80" y="690" fill="#ffa726" font-size="10">Activation 4:</text><text x="162" y="690" fill="#8b949e" font-size="10">excess=1 → factor=1.5¹=1.5 → effective_timeout = 450s</text>
+<text x="80" y="708" fill="#ffa726" font-size="10">Activation 5:</text><text x="162" y="708" fill="#8b949e" font-size="10">excess=2 → factor=1.5²=2.25 → effective_timeout = 675s</text>
+<text x="80" y="726" fill="#f85149" font-size="10">Activation 7+:</text><text x="170" y="726" fill="#8b949e" font-size="10">excess≥4 → factor=1.5⁴=5.06 → capped at 4.0 → effective_timeout = 1200s</text>
+<text x="620" y="672" fill="#6e7681" font-size="10">Decay trigger:</text><text x="710" y="672" fill="#8b949e" font-size="10">occupancy_timeout fires normally (user left → light off naturally)</text>
+<text x="620" y="690" fill="#6e7681" font-size="10">Decay step:</text><text x="706" y="690" fill="#8b949e" font-size="10">oldest timestamp drops off window → count decreases → factor recalculated</text>
+<text x="620" y="708" fill="#6e7681" font-size="10">Full decay:</text><text x="706" y="708" fill="#8b949e" font-size="10">after adaptive_window (600s) with no activations → factor returns to 1.0</text>
+<text x="620" y="726" fill="#6e7681" font-size="10">No decay:</text><text x="700" y="726" fill="#8b949e" font-size="10">during override, failsafe, suspend — only natural timeout exit triggers decay</text>
+</svg>

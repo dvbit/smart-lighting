@@ -212,7 +212,11 @@ Se il sensore presenza resta ON ma nessun movimento per `no_motion_timeout` seco
 
 Se le luci sono ON in profilo normale (non soffuso, non override) e la luce ambientale supera `soglia_lux × (1 + lux_hysteresis_pct/100)` per `lux_hysteresis_time` secondi consecutivi → spegne. Gestisce l'apertura delle finestre.
 
+
 ## Timeout Adattivo
+
+![Meccanismo Timeout Adattivo](docs/adaptive_timeout.svg)
+
 
 Nelle aree ad alto traffico, il ciclaggio frequente acceso/spento viene prevenuto:
 - Attivazioni contate in una finestra mobile

@@ -212,7 +212,11 @@ If occupancy sensor stays ON but no motion for `no_motion_timeout` seconds → w
 
 If lights are ON in normal profile (not soft, not override) and ambient light exceeds `lux_threshold × (1 + lux_hysteresis_pct/100)` for `lux_hysteresis_time` consecutive seconds → turns off. Handles windows being opened.
 
+
 ## Adaptive Timeout
+
+![Adaptive Timeout Mechanism](docs/adaptive_timeout.svg)
+
 
 In high-traffic areas, frequent on/off cycling is prevented:
 - Activations counted in a rolling window
