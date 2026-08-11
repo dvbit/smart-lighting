@@ -147,6 +147,11 @@ Ogni area configurata crea un dispositivo virtuale con queste entità:
 |--------|-------------|
 | `button.*_set_lux_threshold` | Cattura lettura lux corrente come nuova soglia |
 
+
+## State Machine
+
+![Smart Lighting State Machine](docs/state_machine.svg)
+
 ## Logica Principale
 
 ### Attivazione

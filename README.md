@@ -147,6 +147,11 @@ Each configured area creates a virtual device with these entities:
 |--------|-------------|
 | `button.*_set_lux_threshold` | Capture current lux reading as new threshold |
 
+
+## State Machine
+
+![Smart Lighting State Machine](docs/state_machine.svg)
+
 ## Core Logic
 
 ### Activation
