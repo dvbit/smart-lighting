@@ -1,0 +1,136 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sélection de zone",
+        "description": "Sélectionnez la zone Home Assistant à configurer.",
+        "data": {
+          "area_id": "Zone"
+        }
+      },
+      "sensors": {
+        "title": "Capteurs",
+        "description": "Sélectionnez les capteurs pour cette zone.",
+        "data": {
+          "motion_sensors": "Capteurs de mouvement",
+          "occupancy_sensor": "Capteur de présence",
+          "lux_sensor": "Capteur de luminosité",
+          "lux_threshold": "Seuil de luminosité"
+        }
+      },
+      "actuators": {
+        "title": "Actionneurs",
+        "description": "Configurez les entités lumière et relais. Au moins un est requis.",
+        "data": {
+          "bulb_entity": "Ampoules connectées (optionnel)",
+          "relay_entity": "Relais (optionnel)",
+          "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
+          "soft_relay_entity": "Relais profil tamisé (optionnel)",
+          "suspend_entity": "Entité de suspension (optionnel)",
+          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
+        }
+      },
+      "timings": {
+        "title": "Temporisations",
+        "description": "Configurez les délais et les paramètres d'avertissement.",
+        "data": {
+          "occupancy_timeout": "Délai de présence",
+          "failsafe_timeout": "Délai de sécurité",
+          "adaptive_window": "Fenêtre adaptative",
+          "adaptive_threshold": "Seuil adaptatif",
+          "adaptive_multiplier": "Multiplicateur adaptatif",
+          "adaptive_max_factor": "Facteur maximum adaptatif",
+          "perm_override_timeout": "Délai d'expiration override permanent",
+          "lux_hysteresis_pct": "Seuil lux haut %",
+          "lux_hysteresis_time": "Temps hystérésis lux",
+          "temp_override_timeout": "Délai override temporaire (0=jamais)",
+          "warning_dim_pct": "Atténuation avertissement %",
+          "warning_dim_duration": "Durée atténuation",
+          "no_motion_timeout": "Délai sans mouvement"
+        }
+      },
+      "profiles": {
+        "title": "Profils de luminosité",
+        "description": "Configurez les profils de luminosité normale et tamisée.",
+        "data": {
+          "brightness_normal": "Luminosité normale",
+          "brightness_soft": "Luminosité tamisée",
+          "profile_mode": "Déclencheur du profil tamisé",
+          "soft_time_start": "Début plage tamisée",
+          "soft_time_end": "Fin plage tamisée",
+          "soft_entity": "Entité profil tamisé"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Au moins un actionneur (ampoule ou relais) est requis."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Sélection de zone",
+        "description": "Changer la zone configurée.",
+        "data": {
+          "area_id": "Zone"
+        }
+      },
+      "sensors": {
+        "title": "Capteurs",
+        "description": "Mettre à jour les capteurs.",
+        "data": {
+          "motion_sensors": "Capteurs de mouvement",
+          "occupancy_sensor": "Capteur de présence",
+          "lux_sensor": "Capteur de luminosité",
+          "lux_threshold": "Seuil de luminosité"
+        }
+      },
+      "actuators": {
+        "title": "Actionneurs",
+        "description": "Mettre à jour les entités.",
+        "data": {
+          "bulb_entity": "Ampoules connectées (optionnel)",
+          "relay_entity": "Relais (optionnel)",
+          "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
+          "soft_relay_entity": "Relais profil tamisé (optionnel)",
+          "suspend_entity": "Entité de suspension (optionnel)",
+          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
+        }
+      },
+      "timings": {
+        "title": "Temporisations",
+        "description": "Mettre à jour les délais.",
+        "data": {
+          "occupancy_timeout": "Délai de présence",
+          "failsafe_timeout": "Délai de sécurité",
+          "adaptive_window": "Fenêtre adaptative",
+          "adaptive_threshold": "Seuil adaptatif",
+          "adaptive_multiplier": "Multiplicateur adaptatif",
+          "adaptive_max_factor": "Facteur maximum adaptatif",
+          "perm_override_timeout": "Délai d'expiration override permanent",
+          "lux_hysteresis_pct": "Seuil lux haut %",
+          "lux_hysteresis_time": "Temps hystérésis lux",
+          "temp_override_timeout": "Délai override temporaire (0=jamais)",
+          "warning_dim_pct": "Atténuation avertissement %",
+          "warning_dim_duration": "Durée atténuation",
+          "no_motion_timeout": "Délai sans mouvement"
+        }
+      },
+      "profiles": {
+        "title": "Profils de luminosité",
+        "description": "Mettre à jour les profils.",
+        "data": {
+          "brightness_normal": "Luminosité normale",
+          "brightness_soft": "Luminosité tamisée",
+          "profile_mode": "Déclencheur du profil tamisé",
+          "soft_time_start": "Début plage tamisée",
+          "soft_time_end": "Fin plage tamisée",
+          "soft_entity": "Entité profil tamisé"
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Au moins un actionneur (ampoule ou relais) est requis."
+    }
+  }
+}
