@@ -45,8 +45,7 @@
           "lux_hysteresis_time": "Tempo isteresi lux — secondi che la lux deve restare alta prima dello spegnimento",
           "temp_override_timeout": "Timeout override temporaneo — ritorno automatico dopo N secondi di inattività (0 = mai, resta fino al prossimo click)",
           "warning_dim_pct": "Attenuazione avviso % — luminosità durante l'attenuazione pre-spegnimento (es. 30 = 30%)",
-          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)",
-          "no_motion_timeout": "Fallback senza movimento — se la presenza resta ON ma nessun movimento per N secondi → attenuazione e spegnimento. 0 = disabilitato"
+          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)"
         }
       },
       "profiles": {
@@ -112,8 +111,7 @@
           "lux_hysteresis_time": "Tempo isteresi lux — secondi che la lux deve restare alta prima dello spegnimento",
           "temp_override_timeout": "Timeout override temporaneo — ritorno automatico dopo N secondi di inattività (0 = mai, resta fino al prossimo click)",
           "warning_dim_pct": "Attenuazione avviso % — luminosità durante l'attenuazione pre-spegnimento (es. 30 = 30%)",
-          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)",
-          "no_motion_timeout": "Fallback senza movimento — se la presenza resta ON ma nessun movimento per N secondi → attenuazione e spegnimento. 0 = disabilitato"
+          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)"
         }
       },
       "profiles": {

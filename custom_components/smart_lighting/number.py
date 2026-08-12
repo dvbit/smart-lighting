@@ -81,14 +81,6 @@ async def async_setup_entry(
         ),
         SmartLightingNumber(
             coordinator, entry, area_name,
-            key="no_motion_timeout",
-            name="No Motion Timeout",
-            prop_name="runtime_no_motion_timeout",
-            min_value=0, max_value=7200, step=60,
-            unit=UnitOfTime.SECONDS,
-        ),
-        SmartLightingNumber(
-            coordinator, entry, area_name,
             key="lux_threshold",
             name="Lux Threshold",
             prop_name="runtime_lux_threshold",

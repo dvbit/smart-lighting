@@ -45,8 +45,7 @@
           "lux_hysteresis_time": "Tiempo histéresis lux — segundos que la lux debe permanecer alta antes del apagado",
           "temp_override_timeout": "Timeout override temporal — retorno automático tras N segundos de inactividad (0 = nunca, hasta siguiente clic)",
           "warning_dim_pct": "Atenuación aviso % — brillo durante la atenuación previa al apagado (ej. 30 = 30%)",
-          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)",
-          "no_motion_timeout": "Fallback sin movimiento — si presencia ON pero sin movimiento N segundos → atenuar y apagar. 0 = desactivado"
+          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)"
         }
       },
       "profiles": {
@@ -112,8 +111,7 @@
           "lux_hysteresis_time": "Tiempo histéresis lux — segundos que la lux debe permanecer alta antes del apagado",
           "temp_override_timeout": "Timeout override temporal — retorno automático tras N segundos de inactividad (0 = nunca, hasta siguiente clic)",
           "warning_dim_pct": "Atenuación aviso % — brillo durante la atenuación previa al apagado (ej. 30 = 30%)",
-          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)",
-          "no_motion_timeout": "Fallback sin movimiento — si presencia ON pero sin movimiento N segundos → atenuar y apagar. 0 = desactivado"
+          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)"
         }
       },
       "profiles": {

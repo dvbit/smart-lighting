@@ -34,8 +34,8 @@ CONF_TEMP_OVERRIDE_TIMEOUT = "temp_override_timeout"  # [Spec §10] temp overrid
 CONF_WARNING_DIM_PCT = "warning_dim_pct"        # % brightness during warning
 CONF_WARNING_DIM_DURATION = "warning_dim_duration"  # seconds to stay dimmed
 
-# ── Config keys: Fallback no-motion [Spec §16] ──────────────────
-CONF_NO_MOTION_TIMEOUT = "no_motion_timeout"    # seconds with occupancy but no motion
+# ── Config keys: Fallback no-motion [Spec §16 - REMOVED] ────────
+# no_motion_timeout removed: failsafe covers this case
 
 # ── Config keys: Adaptive Timeout (anti-flickering) ──────────────
 CONF_ADAPTIVE_WINDOW = "adaptive_window"          # window in seconds
@@ -78,7 +78,6 @@ DEFAULT_PERM_OVERRIDE_TIMEOUT = 3600  # 1 hour [Spec §11]
 DEFAULT_TEMP_OVERRIDE_TIMEOUT = 0     # 0 = no timeout [Spec §10]
 DEFAULT_WARNING_DIM_PCT = 30           # 30% brightness during warning [Spec §6]
 DEFAULT_WARNING_DIM_DURATION = 10     # 10 seconds dimmed [Spec §6]
-DEFAULT_NO_MOTION_TIMEOUT = 1800      # 30 min fallback [Spec §16]
 DEFAULT_BRIGHTNESS_NORMAL = 255        # max [Spec §5]
 DEFAULT_BRIGHTNESS_SOFT = 100          # dimmed [Spec §5]
 DEFAULT_SOFT_TIME_START = "20:00"      # [Spec §12]

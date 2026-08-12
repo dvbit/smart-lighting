@@ -31,7 +31,6 @@ var SL_I18N = {
     adaptive_multiplier:"Adaptive Multiplier", adaptive_max_factor:"Max Adaptive Factor",
     lux_hysteresis_pct:"Lux Hysteresis %", lux_hysteresis_time:"Lux Hysteresis Time",
     warning_dim_pct:"Warning Dim %", warning_dim_duration:"Warning Dim Duration",
-    no_motion_timeout:"No-Motion Timeout",
     temp_override_timeout:"Temp Override Timeout"
   },
   it: {
@@ -47,7 +46,6 @@ var SL_I18N = {
     adaptive_multiplier:"Moltiplicatore Adattivo", adaptive_max_factor:"Fattore Max Adattivo",
     lux_hysteresis_pct:"Isteresi Lux %", lux_hysteresis_time:"Tempo Isteresi Lux",
     warning_dim_pct:"Attenuazione Avviso %", warning_dim_duration:"Durata Attenuazione",
-    no_motion_timeout:"Timeout Senza Movimento",
     temp_override_timeout:"Timeout Override Temp."
   },
   fr: {
@@ -63,7 +61,6 @@ var SL_I18N = {
     adaptive_multiplier:"Multiplicateur Adaptatif", adaptive_max_factor:"Facteur Max Adaptatif",
     lux_hysteresis_pct:"Hystérésis Lux %", lux_hysteresis_time:"Temps Hystérésis Lux",
     warning_dim_pct:"Atténuation %", warning_dim_duration:"Durée Atténuation",
-    no_motion_timeout:"Délai Sans Mouvement",
     temp_override_timeout:"Délai Override Temp."
   },
   es: {
@@ -79,7 +76,6 @@ var SL_I18N = {
     adaptive_multiplier:"Multiplicador Adaptativo", adaptive_max_factor:"Factor Max Adaptativo",
     lux_hysteresis_pct:"Histéresis Lux %", lux_hysteresis_time:"Tiempo Histéresis Lux",
     warning_dim_pct:"Atenuación %", warning_dim_duration:"Duración Atenuación",
-    no_motion_timeout:"Timeout Sin Movimiento",
     temp_override_timeout:"Timeout Override Temp."
   },
   de: {
@@ -95,7 +91,6 @@ var SL_I18N = {
     adaptive_multiplier:"Adaptiver Multiplikator", adaptive_max_factor:"Adaptiver Max-Faktor",
     lux_hysteresis_pct:"Lux-Hysterese %", lux_hysteresis_time:"Lux-Hysterese Zeit",
     warning_dim_pct:"Dimmung %", warning_dim_duration:"Dimmung Dauer",
-    no_motion_timeout:"Timeout Ohne Bewegung",
     temp_override_timeout:"Temp. Override-Timeout"
   }
 };
@@ -134,7 +129,6 @@ class SmartLightingCard extends HTMLElement {
       temp_override_timeout:"number.smart_lighting_"+a+"_temp_override_timeout",
       warning_dim_pct:      "number.smart_lighting_"+a+"_warning_dim_pct",
       warning_dim_duration: "number.smart_lighting_"+a+"_warning_dim_duration",
-      no_motion_timeout:    "number.smart_lighting_"+a+"_no_motion_timeout",
       lux_threshold:        "number.smart_lighting_"+a+"_lux_threshold",
       adaptive_window:      "number.smart_lighting_"+a+"_adaptive_window",
       adaptive_threshold_n: "number.smart_lighting_"+a+"_adaptive_threshold",
@@ -504,7 +498,6 @@ class SmartLightingCard extends HTMLElement {
       {e:this._ent.temp_override_timeout,  k:"temp_override_timeout",u:"s",  s:60},
       {e:this._ent.warning_dim_pct,       k:"warning_dim_pct",      u:"%",  s:5},
       {e:this._ent.warning_dim_duration,  k:"warning_dim_duration",  u:"s",  s:1},
-      {e:this._ent.no_motion_timeout,     k:"no_motion_timeout",    u:"s",  s:60},
       {e:this._ent.lux_threshold,         k:"lux_threshold",        u:"lx", s:1},
       {e:this._ent.adaptive_window,       k:"adaptive_window",      u:"s",  s:60},
       {e:this._ent.adaptive_threshold_n,  k:"adaptive_threshold_n", u:"",   s:1},

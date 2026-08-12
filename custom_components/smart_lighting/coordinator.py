@@ -71,7 +71,6 @@ from .const import (
     CONF_TEMP_OVERRIDE_TIMEOUT,
     CONF_WARNING_DIM_DURATION,
     CONF_WARNING_DIM_PCT,
-    CONF_NO_MOTION_TIMEOUT,
     DEFAULT_ADAPTIVE_MAX_FACTOR,
     DEFAULT_ADAPTIVE_MULTIPLIER,
     DEFAULT_ADAPTIVE_THRESHOLD,
@@ -87,7 +86,6 @@ from .const import (
     DEFAULT_TEMP_OVERRIDE_TIMEOUT,
     DEFAULT_WARNING_DIM_DURATION,
     DEFAULT_WARNING_DIM_PCT,
-    DEFAULT_NO_MOTION_TIMEOUT,
     DOMAIN,
     PERSIST_LAST_MANUAL_ACTION,
     PERSIST_OVERRIDE_STATE,
@@ -158,9 +156,6 @@ class SmartLightingCoordinator:
         self._runtime_warning_dim_duration: float = float(
             config.get(CONF_WARNING_DIM_DURATION, DEFAULT_WARNING_DIM_DURATION)
         )
-        self._runtime_no_motion_timeout: float = float(
-            config.get(CONF_NO_MOTION_TIMEOUT, DEFAULT_NO_MOTION_TIMEOUT)
-        )
 
         # ── Listeners ─────────────────────────────────────────────
         self._unsub_listeners: list[CALLBACK_TYPE] = []
@@ -197,9 +192,6 @@ class SmartLightingCoordinator:
             config.get(CONF_TEMP_OVERRIDE_TIMEOUT, DEFAULT_TEMP_OVERRIDE_TIMEOUT)
         )
 
-        # ── No-motion fallback timer [Spec §16] ─────────────────
-        self._no_motion_timer: asyncio.TimerHandle | None = None
-        self._no_motion_timer_end: float | None = None
         self._last_motion_time: float = 0.0
 
     # ── Properties ───────────────────────────────────────────────
@@ -447,16 +439,6 @@ class SmartLightingCoordinator:
         self._runtime_warning_dim_duration = value
 
     @property
-    def runtime_no_motion_timeout(self) -> float:
-        """Return current no-motion fallback timeout [Spec §16]."""
-        return self._runtime_no_motion_timeout
-
-    @runtime_no_motion_timeout.setter
-    def runtime_no_motion_timeout(self, value: float) -> None:
-        """Set no-motion fallback timeout."""
-        self._runtime_no_motion_timeout = value
-
-    @property
     def runtime_lux_threshold(self) -> float:
         """Return current runtime lux threshold [Spec §9]."""
         return float(self.config.get(CONF_LUX_THRESHOLD, DEFAULT_LUX_THRESHOLD))
@@ -647,44 +629,49 @@ class SmartLightingCoordinator:
 
     @callback
     def _handle_motion(self, state: State) -> None:
-        """Handle motion sensor state change [Spec §7, §8, §16].
+        """Handle motion sensor state change [Spec §7, §8].
 
-        Motion always resets and restarts the failsafe timer,
-        even during override states. Failsafe protects against
-        a stuck occupancy sensor [Spec §8].
-        Also resets the no-motion fallback timer [Spec §16].
-        Always notifies update so card icons reflect current state.
+        Motion ON:
+        - Resets failsafe timer
+        - Cancels occupancy countdown (person is active)
+        - Activates if idle/warning + lux below threshold
+        - Restarts occupancy timer if already active (timeout from last motion)
+
+        Motion OFF:
+        - If no occupancy sensor: starts occupancy countdown (motion is
+          the only presence indicator)
+        - If occupancy sensor present: do nothing — occupancy sensor drives
+          the countdown; failsafe handles stuck sensors
         """
         is_motion = state.state == STATE_ON
 
         if not is_motion:
             # Motion OFF
             if self._state == STATE_ACTIVE:
-                # If no occupancy sensor: use motion as occupancy fallback
-                # Start timeout from last motion
                 has_occupancy = bool(self.config.get(CONF_OCCUPANCY_SENSOR))
                 if not has_occupancy:
+                    # No occupancy sensor: motion is the only presence signal
+                    # Start countdown from last motion
                     _LOGGER.debug(
                         "No occupancy sensor: starting occupancy timer on motion OFF"
                     )
                     self._start_occupancy_timer()
-                self._start_no_motion_timer()
+                # With occupancy sensor: do nothing here.
+                # Occupancy sensor OFF will trigger the countdown.
+                # Failsafe handles stuck occupancy sensors.
             self._notify_update()
             return
 
         _LOGGER.debug("Motion detected, current state: %s", self._state)
 
-        # Motion always resets occupancy timer [Spec §7]
+        # Motion always resets occupancy timer (timeout from last motion)
         self._cancel_occupancy_timer()
-
-        # Reset no-motion fallback [Spec §16]
-        self._cancel_no_motion_timer()
         self._last_motion_time = self.hass.loop.time()
 
         # Failsafe resets on every motion [Spec §8]
         self._start_failsafe_timer()
 
-        # Cancel warning if active [Spec §7]
+        # Cancel warning if active — motion means presence [Spec §7]
         if self._state == STATE_WARNING:
             self._cancel_warning()
 
@@ -702,19 +689,24 @@ class SmartLightingCoordinator:
         if self._state in (STATE_IDLE, STATE_WARNING):
             self._activate()
         elif self._state == STATE_ACTIVE:
-            # Already active: restart timeout from this motion [Spec §7]
+            # Already active: restart occupancy timer from this motion
             self._start_occupancy_timer()
 
-    # ── Occupancy Handling [Spec §3, §11] ────────────────────────
+    # ── Occupancy Handling [Spec §3] ─────────────────────────────
 
     @callback
     def _handle_occupancy(self, state: State) -> None:
         """Handle occupancy sensor state change [Spec §3].
 
-        During override states, occupancy changes are ignored.
-        If no occupancy sensor configured, motion sensor drives
-        the timeout (see _handle_motion for fallback logic).
-        Always notifies update so card icons reflect current state.
+        Occupancy ON:
+        - Cancels occupancy countdown
+        - If no motion sensors configured: activates (occupancy is the
+          primary presence signal)
+        - If motion sensors present: cancels warning, stays active
+
+        Occupancy OFF:
+        - Starts occupancy countdown → warning dim → OFF
+        - Override states: ignored
         """
         is_occupied = state.state == STATE_ON
 
@@ -726,14 +718,27 @@ class SmartLightingCoordinator:
         if is_occupied:
             # Someone present: cancel the occupancy countdown
             self._cancel_occupancy_timer()
+
             if self._state == STATE_WARNING:
                 self._cancel_warning()
                 self._state = STATE_ACTIVE
+                self._notify_update()
+                return
+
+            # If no motion sensors: use occupancy as activation trigger
+            has_motion = bool(self.config.get(CONF_MOTION_SENSORS))
+            if not has_motion and self._state == STATE_IDLE:
+                if self._is_lux_below_threshold():
+                    _LOGGER.debug(
+                        "No motion sensors: activating on occupancy ON"
+                    )
+                    self._activate()
+                    return
+
             self._notify_update()
         else:
             # No one present: start countdown to warning dim
-            # Only if motion-based timer is not already running
-            if self._state == STATE_ACTIVE and self._occupancy_timer is None:
+            if self._state == STATE_ACTIVE:
                 self._start_occupancy_timer()
             self._notify_update()
 
@@ -1014,7 +1019,6 @@ class SmartLightingCoordinator:
         self._actuate_off()
         self._cancel_occupancy_timer()
         self._cancel_failsafe_timer()
-        self._cancel_no_motion_timer()
         self._lux_high_since = None
         self._notify_update()
 
@@ -1393,61 +1397,7 @@ class SmartLightingCoordinator:
         self._cancel_warning()
         self._cancel_perm_override_timer()
         self._cancel_temp_override_timer()
-        self._cancel_no_motion_timer()
         self._lux_high_since = None
-
-    # ── No-motion fallback [Spec §16] ────────────────────────────
-
-    @callback
-    def _start_no_motion_timer(self) -> None:
-        """Start no-motion fallback timer [Spec §16].
-
-        If occupancy is ON but no motion for no_motion_timeout
-        seconds, trigger warning dim then off. Protects against
-        stuck occupancy sensors or static heat sources.
-        """
-        self._cancel_no_motion_timer()
-        timeout = self._runtime_no_motion_timeout
-        if timeout <= 0:
-            return
-
-        self._no_motion_timer_end = self.hass.loop.time() + timeout
-        self._no_motion_timer = self.hass.loop.call_later(
-            timeout,
-            lambda: self.hass.async_create_task(
-                self._async_no_motion_timeout()
-            ),
-        )
-        _LOGGER.debug("No-motion fallback timer started: %.0fs", timeout)
-
-    async def _async_no_motion_timeout(self) -> None:
-        """Handle no-motion fallback timeout [Spec §16].
-
-        Occupancy is ON but no motion detected for a long time.
-        Start warning dim sequence to turn off.
-        """
-        self._no_motion_timer = None
-        self._no_motion_timer_end = None
-
-        if self._state in (STATE_TEMP_OVERRIDE, STATE_PERM_OVERRIDE):
-            _LOGGER.debug("No-motion timeout but in override, ignoring")
-            return
-
-        if self._state == STATE_ACTIVE:
-            _LOGGER.info(
-                "No-motion fallback: occupancy ON but no motion for %.0fs, "
-                "starting warning dim [Spec §16]",
-                self._runtime_no_motion_timeout,
-            )
-            self._start_warning()
-
-    @callback
-    def _cancel_no_motion_timer(self) -> None:
-        """Cancel no-motion fallback timer."""
-        if self._no_motion_timer is not None:
-            self._no_motion_timer.cancel()
-            self._no_motion_timer = None
-        self._no_motion_timer_end = None
 
     # ── Helpers ──────────────────────────────────────────────────
 

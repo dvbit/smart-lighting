@@ -45,8 +45,7 @@
           "lux_hysteresis_time": "Lux hysteresis time — seconds lux must stay above threshold before auto-off triggers",
           "temp_override_timeout": "Temp override timeout — return to auto after N seconds of inactivity (0 = never, stays until next click)",
           "warning_dim_pct": "Warning dim % — brightness during pre-off dim (e.g. 30 = dim to 30%)",
-          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)",
-          "no_motion_timeout": "No-motion fallback — if occupancy sensor stays ON but no motion detected for N seconds, trigger dim and turn off. Protects against stuck sensors (0 = disabled)"
+          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)"
         }
       },
       "profiles": {
@@ -112,8 +111,7 @@
           "lux_hysteresis_time": "Lux hysteresis time — seconds lux must stay above threshold before auto-off triggers",
           "temp_override_timeout": "Temp override timeout — return to auto after N seconds of inactivity (0 = never, stays until next click)",
           "warning_dim_pct": "Warning dim % — brightness during pre-off dim (e.g. 30 = dim to 30%)",
-          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)",
-          "no_motion_timeout": "No-motion fallback — if occupancy sensor stays ON but no motion detected for N seconds, trigger dim and turn off. Protects against stuck sensors (0 = disabled)"
+          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)"
         }
       },
       "profiles": {

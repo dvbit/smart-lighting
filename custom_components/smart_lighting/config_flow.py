@@ -61,7 +61,6 @@ from .const import (
     CONF_SUSPEND_ENTITY,
     CONF_WARNING_DIM_DURATION,
     CONF_WARNING_DIM_PCT,
-    CONF_NO_MOTION_TIMEOUT,
     DEFAULT_ADAPTIVE_MAX_FACTOR,
     DEFAULT_ADAPTIVE_MULTIPLIER,
     DEFAULT_ADAPTIVE_THRESHOLD,
@@ -79,7 +78,6 @@ from .const import (
     DEFAULT_SOFT_TIME_START,
     DEFAULT_WARNING_DIM_DURATION,
     DEFAULT_WARNING_DIM_PCT,
-    DEFAULT_NO_MOTION_TIMEOUT,
     DOMAIN,
     PROFILE_MODE_ENTITY,
     PROFILE_MODE_TIME,
@@ -356,8 +354,7 @@ class SmartLightingConfigFlow(ConfigFlow, domain=DOMAIN):
                         )
                     ),
                     vol.Optional(
-                        CONF_NO_MOTION_TIMEOUT,
-                        default=DEFAULT_NO_MOTION_TIMEOUT,
+                                            default=DEFAULT_NO_MOTION_TIMEOUT,
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=0, max=7200, step=60,
@@ -803,11 +800,8 @@ class SmartLightingOptionsFlow(OptionsFlow):
                         )
                     ),
                     vol.Optional(
-                        CONF_NO_MOTION_TIMEOUT,
-                        default=self._cur(
-                            CONF_NO_MOTION_TIMEOUT,
-                            DEFAULT_NO_MOTION_TIMEOUT,
-                        ),
+                                            default=self._cur(
+                                                                        ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=0, max=7200, step=60,

@@ -45,8 +45,7 @@
           "lux_hysteresis_time": "Temps hystérésis lux — secondes que la lux doit rester haute avant l'extinction",
           "temp_override_timeout": "Délai override temp. — retour auto après N secondes d'inactivité (0 = jamais, reste jusqu'au prochain clic)",
           "warning_dim_pct": "Atténuation % — luminosité pendant l'atténuation pré-extinction (ex. 30 = 30%)",
-          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)",
-          "no_motion_timeout": "Fallback sans mouvement — si présence ON mais pas de mouvement pendant N secondes → atténuation et extinction. 0 = désactivé"
+          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)"
         }
       },
       "profiles": {
@@ -112,8 +111,7 @@
           "lux_hysteresis_time": "Temps hystérésis lux — secondes que la lux doit rester haute avant l'extinction",
           "temp_override_timeout": "Délai override temp. — retour auto après N secondes d'inactivité (0 = jamais, reste jusqu'au prochain clic)",
           "warning_dim_pct": "Atténuation % — luminosité pendant l'atténuation pré-extinction (ex. 30 = 30%)",
-          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)",
-          "no_motion_timeout": "Fallback sans mouvement — si présence ON mais pas de mouvement pendant N secondes → atténuation et extinction. 0 = désactivé"
+          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)"
         }
       },
       "profiles": {
