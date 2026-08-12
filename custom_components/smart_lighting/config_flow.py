@@ -324,11 +324,22 @@ class SmartLightingConfigFlow(ConfigFlow, domain=DOMAIN):
                     ),
                     vol.Optional(
                         CONF_PERM_OVERRIDE_TIMEOUT,
-    CONF_TEMP_OVERRIDE_TIMEOUT,
                         default=DEFAULT_PERM_OVERRIDE_TIMEOUT,
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=60,
+                            max=86400,
+                            step=60,
+                            unit_of_measurement="s",
+                            mode="box",
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_TEMP_OVERRIDE_TIMEOUT,
+                        default=DEFAULT_TEMP_OVERRIDE_TIMEOUT,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
                             max=86400,
                             step=60,
                             unit_of_measurement="s",
@@ -752,16 +763,28 @@ class SmartLightingOptionsFlow(OptionsFlow):
                     ),
                     vol.Optional(
                         CONF_PERM_OVERRIDE_TIMEOUT,
-    CONF_TEMP_OVERRIDE_TIMEOUT,
                         default=self._cur(
                             CONF_PERM_OVERRIDE_TIMEOUT,
-    CONF_TEMP_OVERRIDE_TIMEOUT,
                             DEFAULT_PERM_OVERRIDE_TIMEOUT,
-    DEFAULT_TEMP_OVERRIDE_TIMEOUT,
                         ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=60,
+                            max=86400,
+                            step=60,
+                            unit_of_measurement="s",
+                            mode="box",
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_TEMP_OVERRIDE_TIMEOUT,
+                        default=self._cur(
+                            CONF_TEMP_OVERRIDE_TIMEOUT,
+                            DEFAULT_TEMP_OVERRIDE_TIMEOUT,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
                             max=86400,
                             step=60,
                             unit_of_measurement="s",
