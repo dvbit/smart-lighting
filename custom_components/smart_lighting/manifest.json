@@ -1,7 +1,7 @@
 {
   "domain": "smart_lighting",
   "name": "Smart Lighting",
-  "version": "4.3.0",
+  "version": "4.3.1",
   "codeowners": [
     "@dvbit"
   ],

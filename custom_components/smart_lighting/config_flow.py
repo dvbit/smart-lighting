@@ -354,14 +354,6 @@ class SmartLightingConfigFlow(ConfigFlow, domain=DOMAIN):
                         )
                     ),
                     vol.Optional(
-                                            default=DEFAULT_NO_MOTION_TIMEOUT,
-                    ): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0, max=7200, step=60,
-                            unit_of_measurement="s", mode="box",
-                        )
-                    ),
-                    vol.Optional(
                         CONF_ADAPTIVE_WINDOW,
                         default=DEFAULT_ADAPTIVE_WINDOW,
                     ): selector.NumberSelector(
