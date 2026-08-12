@@ -607,6 +607,15 @@ class SmartLightingCoordinator:
         monitored = self.config.get(CONF_PHYSICAL_INTERACTION_SENSOR)
         suspend = self.config.get(CONF_SUSPEND_ENTITY)
 
+        _LOGGER.debug(
+            "Event: %s %s→%s | state=%s is_on=%s",
+            entity_id,
+            old_state.state if old_state else "?",
+            new_state.state,
+            self._state,
+            self._is_on,
+        )
+
         # Suspend entity is always handled, even when suspended [Spec §15]
         if entity_id == suspend:
             self._handle_suspend(new_state)
@@ -1006,12 +1015,18 @@ class SmartLightingCoordinator:
         self._state = STATE_ACTIVE
         self._is_on = True
         self._brightness = self._get_current_brightness()
+        _LOGGER.info(
+            "ACTIVATE: brightness=%d profile=%s adaptive=%.2f activations=%d",
+            self._brightness, self.current_profile,
+            self._adaptive_factor, len(self._activation_timestamps),
+        )
         self._actuate_on()
         self._notify_update()
 
     @callback
     def _deactivate(self) -> None:
         """Deactivate the light [Spec §3]."""
+        _LOGGER.info("DEACTIVATE: from state=%s", self._state)
         if self._state not in (STATE_TEMP_OVERRIDE, STATE_PERM_OVERRIDE):
             self._state = STATE_IDLE
         self._is_on = False
@@ -1065,6 +1080,10 @@ class SmartLightingCoordinator:
         same brightness command simultaneously.
         """
         bulbs, relay = self._get_active_actuators()
+        _LOGGER.debug(
+            "ACTUATE ON: bulbs=%s relay=%s brightness=%d",
+            bulbs, relay, self._brightness,
+        )
 
         for bulb in bulbs:
             self.hass.async_create_task(
@@ -1093,6 +1112,10 @@ class SmartLightingCoordinator:
         bulbs, relay = self._get_active_actuators()
         primary_bulbs = self._to_list(self.config.get(CONF_BULB_ENTITY))
         primary_relay = self.config.get(CONF_RELAY_ENTITY)
+        _LOGGER.debug(
+            "ACTUATE OFF: bulbs=%s relay=%s primary_bulbs=%s primary_relay=%s",
+            bulbs, relay, primary_bulbs, primary_relay,
+        )
 
         # Turn off all relevant bulbs (active + primary for profile switch)
         all_bulbs = set(bulbs + primary_bulbs)
@@ -1153,6 +1176,10 @@ class SmartLightingCoordinator:
         dim_pct = self._runtime_warning_dim_pct
         duration = self._runtime_warning_dim_duration
         bulbs, relay = self._get_active_actuators()
+        _LOGGER.info(
+            "WARNING DIM: %d%% for %.0fs on %s",
+            dim_pct, duration, bulbs,
+        )
 
         try:
             # Dim all bulbs to warning level
@@ -1181,6 +1208,8 @@ class SmartLightingCoordinator:
     def _cancel_warning(self) -> None:
         """Cancel warning dim and restore brightness [Spec §6]."""
         if self._warning_task is not None:
+            _LOGGER.info("WARNING CANCELLED: restoring brightness=%d",
+                         self._brightness)
             self._warning_task.cancel()
             self._warning_task = None
 
@@ -1210,6 +1239,10 @@ class SmartLightingCoordinator:
         self._cancel_occupancy_timer()
         timeout = self._runtime_occupancy_timeout * self._adaptive_factor
         self._occupancy_timer_end = self.hass.loop.time() + timeout
+        _LOGGER.debug(
+            "TIMER occupancy START: %.0fs (base=%.0f adaptive=%.2f)",
+            timeout, self._runtime_occupancy_timeout, self._adaptive_factor,
+        )
         self._occupancy_timer = self.hass.loop.call_later(
             timeout,
             lambda: self.hass.async_create_task(
@@ -1236,6 +1269,8 @@ class SmartLightingCoordinator:
     def _cancel_occupancy_timer(self) -> None:
         """Cancel occupancy timer."""
         if self._occupancy_timer is not None:
+            _LOGGER.debug("TIMER occupancy CANCEL (%.0fs left)",
+                          self.occupancy_timer_remaining)
             self._occupancy_timer.cancel()
             self._occupancy_timer = None
         self._occupancy_timer_end = None
@@ -1246,6 +1281,7 @@ class SmartLightingCoordinator:
         self._cancel_failsafe_timer()
         timeout = self._runtime_failsafe_timeout
         self._failsafe_timer_end = self.hass.loop.time() + timeout
+        _LOGGER.debug("TIMER failsafe START/RESET: %.0fs", timeout)
         self._failsafe_timer = self.hass.loop.call_later(
             timeout,
             lambda: self.hass.async_create_task(
@@ -1392,6 +1428,7 @@ class SmartLightingCoordinator:
     @callback
     def _cancel_all_timers(self) -> None:
         """Cancel all active timers."""
+        _LOGGER.debug("CANCEL ALL TIMERS (state=%s)", self._state)
         self._cancel_occupancy_timer()
         self._cancel_failsafe_timer()
         self._cancel_warning()
@@ -1405,6 +1442,7 @@ class SmartLightingCoordinator:
         """Check if lux is below threshold [Spec §9]."""
         lux_entity = self.config.get(CONF_LUX_SENSOR)
         if not lux_entity:
+            _LOGGER.debug("LUX check: no sensor configured → True")
             return True
 
         state = self.hass.states.get(lux_entity)
