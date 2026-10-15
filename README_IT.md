@@ -147,7 +147,7 @@ Ogni area crea un dispositivo *Smart Lighting &lt;Area&gt;* con queste entità (
 
 ### Numeri (configurazione, runtime, persistenti)
 
-`number.*_<chiave>` per ogni tempo del passo 4 più `lux_threshold`: `occupancy_timeout`, `failsafe_timeout`, `perm_override_timeout`, `temp_override_timeout`, `warning_dim_pct`, `warning_dim_duration`, `lux_threshold`, `adaptive_window`, `adaptive_threshold`, `adaptive_multiplier`, `adaptive_max_factor`, `lux_hysteresis_pct`, `lux_hysteresis_time`. Stesso significato della tabella sopra; le modifiche valgono subito e vengono salvate nella voce.
+`number.*_<chiave>` per ogni tempo del passo 4 più `lux_threshold`: `occupancy_timeout`, `failsafe_timeout`, `perm_override_timeout`, `temp_override_timeout`, `warning_dim_pct`, `warning_dim_duration`, `lux_threshold`, `adaptive_window`, `adaptive_threshold`, `adaptive_multiplier`, `adaptive_max_factor`, `lux_hysteresis_pct`, `lux_hysteresis_time`. Stesso significato della tabella sopra; le modifiche valgono subito e vengono salvate nella voce. Ogni entità numero ha anche un attributo `description` con lo stesso testo di aiuto, nella lingua di HA (sezione Attributi della finestra dell'entità; non salvato nello storico).
 
 ### Pulsante
 
@@ -200,7 +200,7 @@ icon_main: mdi:ceiling-light    # opzionale, icona profilo normale
 icon_soft: mdi:lamp             # opzionale, icona profilo soft
 ```
 
-Barra timer, icona grande per accendere/spegnere, indicatore modalità, icone movimento/occupazione/lux (tap = more-info) e popup impostazioni con tutte le entità numero e il pulsante *Imposta soglia lux*.
+Barra timer, icona grande per accendere/spegnere, indicatore modalità, icone movimento/occupazione/lux (tap = more-info) e popup impostazioni con tutte le entità numero e il pulsante *Imposta soglia lux*. Tocca ⓘ accanto a un parametro per vedere a cosa serve (stesso testo del modulo di configurazione, nella lingua di HA).
 
 ## Esempio di automazione
 

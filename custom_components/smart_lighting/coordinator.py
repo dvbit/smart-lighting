@@ -243,7 +243,7 @@ class SmartLightingCoordinator:
             name=f"Smart Lighting {area_name}",
             manufacturer="Smart Lighting",
             model="Area Controller",
-            sw_version="4.5.0",
+            sw_version="4.6.0",
         )
 
     @property

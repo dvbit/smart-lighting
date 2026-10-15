@@ -1,4 +1,4 @@
-# Smart Lighting Automation -- Specification (v4.5)
+# Smart Lighting Automation -- Specification (v4.6)
 
 ## 1. Scope
 
@@ -184,3 +184,10 @@ Entities per area:
   because HA generates entity_ids from English names and the card looks
   entities up by `smart_lighting_<area>_<key>`.
 - README EN and IT contain a full parameter reference (default, range, meaning).
+- (v4.6) Runtime parameters carry the same help text:
+  - number entities expose a `description` attribute = config flow
+    `data_description` in the HA language (English fallback), refreshed on
+    core config update, excluded from the recorder (`_unrecorded_attributes`);
+  - card v12 settings popup: (i) icon next to each parameter toggles its help
+    text; the *Set lux threshold* button shows a short explanation. Card
+    labels/help are generated from the same source as the translations.

@@ -1,5 +1,5 @@
 /**
- * Smart Lighting Card v11 - Custom Lovelace Card
+ * Smart Lighting Card v12 - Custom Lovelace Card
  *
  * Layout:
  *   TOP-RIGHT badge: profile (🌙/☀️) · actuator set · suspend flag
@@ -7,7 +7,8 @@
  *   CENTER:  large light icon (tap = toggle)
  *   MIDDLE:  mode label (localised) + raw state below it
  *   BOTTOM:  motion · occupancy · lux icons (click = more-info)
- *   GEAR:    settings popup with all parameters
+ *   GEAR:    settings popup with all parameters; (i) next to each
+ *            parameter toggles its localized help text [Spec §19]
  *
  * YAML:
  *   type: custom:smart-lighting-card
@@ -22,78 +23,328 @@ var SL_I18N = {
     idle:"Idle", active:"Automatic", warning:"Warning",
     temp_override:"Manual", perm_override:"Override", suspended:"Suspended",
     settings:"Settings", state:"State", profile:"Profile",
-    adaptive_factor:"Adaptive Factor", activations:"Activations",
-    occupancy_timeout:"Occupancy Timeout", failsafe_timeout:"Failsafe Timeout",
-    override_timeout:"Override Timeout", temp_override_timeout:"Temp Override Timeout",
-    warning_count:"Warning Count", warning_interval:"Warning Interval",
-    lux_threshold:"Lux Threshold", set_lux:"Set Lux from Sensor",
-    adaptive_window:"Adaptive Window", adaptive_threshold_n:"Adaptive Threshold",
-    adaptive_multiplier:"Adaptive Multiplier", adaptive_max_factor:"Max Adaptive Factor",
-    lux_hysteresis_pct:"Lux Hysteresis %", lux_hysteresis_time:"Lux Hysteresis Time",
-    warning_dim_pct:"Warning Dim %", warning_dim_duration:"Warning Dim Duration",
-    temp_override_timeout:"Temp Override Timeout"
+    adaptive_factor:"Adaptive Factor", activations:"Activations"
   },
   it: {
     idle:"Inattivo", active:"Automatico", warning:"Avviso",
     temp_override:"Manuale", perm_override:"Override", suspended:"Sospeso",
     settings:"Impostazioni", state:"Stato", profile:"Profilo",
-    adaptive_factor:"Fattore Adattivo", activations:"Attivazioni",
-    occupancy_timeout:"Timeout Presenza", failsafe_timeout:"Timeout Sicurezza",
-    override_timeout:"Timeout Override", temp_override_timeout:"Timeout Override Temp.",
-    warning_count:"Conteggio Lampeggi", warning_interval:"Intervallo Lampeggi",
-    lux_threshold:"Soglia Lux", set_lux:"Imposta Lux da Sensore",
-    adaptive_window:"Finestra Adattiva", adaptive_threshold_n:"Soglia Adattiva",
-    adaptive_multiplier:"Moltiplicatore Adattivo", adaptive_max_factor:"Fattore Max Adattivo",
-    lux_hysteresis_pct:"Isteresi Lux %", lux_hysteresis_time:"Tempo Isteresi Lux",
-    warning_dim_pct:"Attenuazione Avviso %", warning_dim_duration:"Durata Attenuazione",
-    temp_override_timeout:"Timeout Override Temp."
+    adaptive_factor:"Fattore Adattivo", activations:"Attivazioni"
   },
   fr: {
     idle:"Inactif", active:"Automatique", warning:"Avertissement",
     temp_override:"Manuel", perm_override:"Forçage", suspended:"Suspendu",
     settings:"Paramètres", state:"État", profile:"Profil",
-    adaptive_factor:"Facteur Adaptatif", activations:"Activations",
-    occupancy_timeout:"Délai Présence", failsafe_timeout:"Délai Sécurité",
-    override_timeout:"Délai Forçage", temp_override_timeout:"Délai Override Temp.",
-    warning_count:"Nombre Clignotements", warning_interval:"Intervalle Clignotements",
-    lux_threshold:"Seuil Lux", set_lux:"Définir Lux depuis Capteur",
-    adaptive_window:"Fenêtre Adaptative", adaptive_threshold_n:"Seuil Adaptatif",
-    adaptive_multiplier:"Multiplicateur Adaptatif", adaptive_max_factor:"Facteur Max Adaptatif",
-    lux_hysteresis_pct:"Hystérésis Lux %", lux_hysteresis_time:"Temps Hystérésis Lux",
-    warning_dim_pct:"Atténuation %", warning_dim_duration:"Durée Atténuation",
-    temp_override_timeout:"Délai Override Temp."
+    adaptive_factor:"Facteur Adaptatif", activations:"Activations"
   },
   es: {
     idle:"Inactivo", active:"Automático", warning:"Advertencia",
     temp_override:"Manual", perm_override:"Anulación", suspended:"Suspendido",
     settings:"Ajustes", state:"Estado", profile:"Perfil",
-    adaptive_factor:"Factor Adaptativo", activations:"Activaciones",
-    occupancy_timeout:"Timeout Ocupación", failsafe_timeout:"Timeout Seguridad",
-    override_timeout:"Timeout Anulación", temp_override_timeout:"Timeout Override Temp.",
-    warning_count:"Cantidad Parpadeos", warning_interval:"Intervalo Parpadeos",
-    lux_threshold:"Umbral Lux", set_lux:"Fijar Lux desde Sensor",
-    adaptive_window:"Ventana Adaptativa", adaptive_threshold_n:"Umbral Adaptativo",
-    adaptive_multiplier:"Multiplicador Adaptativo", adaptive_max_factor:"Factor Max Adaptativo",
-    lux_hysteresis_pct:"Histéresis Lux %", lux_hysteresis_time:"Tiempo Histéresis Lux",
-    warning_dim_pct:"Atenuación %", warning_dim_duration:"Duración Atenuación",
-    temp_override_timeout:"Timeout Override Temp."
+    adaptive_factor:"Factor Adaptativo", activations:"Activaciones"
   },
   de: {
     idle:"Inaktiv", active:"Automatisch", warning:"Warnung",
     temp_override:"Manuell", perm_override:"Überschreibung", suspended:"Pausiert",
     settings:"Einstellungen", state:"Status", profile:"Profil",
-    adaptive_factor:"Adaptiver Faktor", activations:"Aktivierungen",
-    occupancy_timeout:"Anwesenheits-Timeout", failsafe_timeout:"Sicherheits-Timeout",
-    override_timeout:"Überschreibungs-Timeout", temp_override_timeout:"Temp. Override-Timeout",
-    warning_count:"Blinkanzahl", warning_interval:"Blinkintervall",
-    lux_threshold:"Lux-Schwelle", set_lux:"Lux vom Sensor übernehmen",
-    adaptive_window:"Adaptives Fenster", adaptive_threshold_n:"Adaptiver Schwellenwert",
-    adaptive_multiplier:"Adaptiver Multiplikator", adaptive_max_factor:"Adaptiver Max-Faktor",
-    lux_hysteresis_pct:"Lux-Hysterese %", lux_hysteresis_time:"Lux-Hysterese Zeit",
-    warning_dim_pct:"Dimmung %", warning_dim_duration:"Dimmung Dauer",
-    temp_override_timeout:"Temp. Override-Timeout"
+    adaptive_factor:"Adaptiver Faktor", activations:"Aktivierungen"
   }
 };
+
+/* BEGIN SL_PARAMS - generated from translations (label, help) [Spec §19] */
+var SL_PARAMS = {
+ "en": {
+  "occupancy_timeout": [
+   "Occupancy timeout",
+   "Countdown before switch-off. It starts when presence ends (occupancy sensor off, or motion off if no occupancy sensor), restarts at every motion and is cancelled when occupancy returns. When it expires the warning dim starts. Multiplied by the adaptive factor in busy areas."
+  ],
+  "failsafe_timeout": [
+   "Failsafe timeout",
+   "Safety net: with no motion for this time everything is forced off, relay included (protects against an occupancy sensor stuck on). Restarts at every motion. Ignored during permanent override."
+  ],
+  "perm_override_timeout": [
+   "Permanent override timeout",
+   "Maximum duration of the permanent override (double click). When it expires the light switches off and automatic mode resumes."
+  ],
+  "temp_override_timeout": [
+   "Temporary override timeout",
+   "In temporary override (single click) every click toggles the light and restarts this timer. When it expires automatic mode resumes: light on if the area is occupied and dark, otherwise off. 0 = never expires by itself."
+  ],
+  "warning_dim_pct": [
+   "Warning dim",
+   "Before switching off, the bulbs are dimmed to this percentage of the current brightness to warn whoever is still in the room. Any motion or occupancy cancels the warning and restores brightness. Effective only with smart bulbs."
+  ],
+  "warning_dim_duration": [
+   "Warning dim duration",
+   "How long the light stays dimmed before switching off."
+  ],
+  "lux_threshold": [
+   "Lux threshold",
+   "Ambient light level below which motion switches the light on. If the light is on, the reading reaches this value and the occupancy sensor is off, the light switches off. Tip: the 'Set lux threshold' button stores the current reading."
+  ],
+  "adaptive_window": [
+   "Adaptive window",
+   "Rolling time window in which automatic activations are counted to detect a high-traffic area."
+  ],
+  "adaptive_threshold": [
+   "Adaptive threshold",
+   "Number of activations within the window above which the occupancy timeout starts to be extended."
+  ],
+  "adaptive_multiplier": [
+   "Adaptive multiplier",
+   "Each activation beyond the threshold multiplies the occupancy timeout by this factor (factor = multiplier ^ extra activations). Example: 1.5 with 2 extra activations → ×2.25."
+  ],
+  "adaptive_max_factor": [
+   "Adaptive max factor",
+   "Upper limit of the extension (e.g. 4.0 → at most 4× the occupancy timeout). Each time the timeout expires normally, the extra part of the factor is halved."
+  ],
+  "lux_hysteresis_pct": [
+   "Natural light margin",
+   "Natural-light auto-off: with the light on in the normal profile, if ambient light exceeds threshold × (1 + margin/100) the light switches off even if the area is occupied (e.g. shutters opened)."
+  ],
+  "lux_hysteresis_time": [
+   "Natural light delay",
+   "Seconds the reading must stay above the margin before the natural-light auto-off, to ignore short peaks."
+  ],
+  "set_lux_threshold": [
+   "Set Lux Threshold",
+   "Reads the illuminance sensor now and stores that value as the new lux threshold. Use it when the room has the light level at which the lights should start switching on."
+  ]
+ },
+ "it": {
+  "occupancy_timeout": [
+   "Timeout occupazione",
+   "Conto alla rovescia prima dello spegnimento. Parte quando la presenza termina (sensore di occupazione spento, o movimento spento se manca il sensore di occupazione), riparte a ogni movimento e si annulla quando l'occupazione ritorna. Alla scadenza inizia il preavviso. Moltiplicato dal fattore adattivo nelle aree di passaggio."
+  ],
+  "failsafe_timeout": [
+   "Timeout di sicurezza",
+   "Rete di sicurezza: senza movimento per questo tempo si spegne tutto, relè compreso (protegge da un sensore di occupazione bloccato su attivo). Riparte a ogni movimento. Ignorato durante l'override permanente."
+  ],
+  "perm_override_timeout": [
+   "Timeout override permanente",
+   "Durata massima dell'override permanente (doppio click). Alla scadenza la luce si spegne e riprende la modalità automatica."
+  ],
+  "temp_override_timeout": [
+   "Timeout override temporaneo",
+   "In override temporaneo (click singolo) ogni click inverte la luce e riavvia questo timer. Alla scadenza riprende la modalità automatica: luce accesa se l'area è occupata e buia, altrimenti spenta. 0 = non scade mai da solo."
+  ],
+  "warning_dim_pct": [
+   "Preavviso: luminosità",
+   "Prima dello spegnimento le lampadine scendono a questa percentuale della luminosità attuale, per avvisare chi è ancora nella stanza. Qualsiasi movimento o occupazione annulla il preavviso e ripristina la luminosità. Efficace solo con lampadine smart."
+  ],
+  "warning_dim_duration": [
+   "Preavviso: durata",
+   "Per quanto tempo la luce resta abbassata prima di spegnersi."
+  ],
+  "lux_threshold": [
+   "Soglia lux",
+   "Livello di luce ambiente sotto il quale il movimento accende la luce. Se la luce è accesa, la lettura raggiunge questo valore e il sensore di occupazione è spento, la luce si spegne. Suggerimento: il pulsante 'Imposta soglia lux' memorizza la lettura attuale."
+  ],
+  "adaptive_window": [
+   "Finestra adattiva",
+   "Finestra temporale mobile in cui si contano le accensioni automatiche per riconoscere un'area di passaggio."
+  ],
+  "adaptive_threshold": [
+   "Soglia adattiva",
+   "Numero di accensioni nella finestra oltre il quale il timeout di occupazione inizia ad allungarsi."
+  ],
+  "adaptive_multiplier": [
+   "Moltiplicatore adattivo",
+   "Ogni accensione oltre la soglia moltiplica il timeout di occupazione per questo fattore (fattore = moltiplicatore ^ accensioni in eccesso). Esempio: 1,5 con 2 accensioni in eccesso → ×2,25."
+  ],
+  "adaptive_max_factor": [
+   "Fattore adattivo massimo",
+   "Limite superiore dell'allungamento (es. 4,0 → al massimo 4× il timeout di occupazione). Ogni volta che il timeout scade normalmente, la parte in eccesso del fattore si dimezza."
+  ],
+  "lux_hysteresis_pct": [
+   "Margine luce naturale",
+   "Spegnimento per luce naturale: con la luce accesa nel profilo normale, se la luce ambiente supera soglia × (1 + margine/100) la luce si spegne anche se l'area è occupata (es. tapparelle aperte)."
+  ],
+  "lux_hysteresis_time": [
+   "Ritardo luce naturale",
+   "Secondi in cui la lettura deve restare sopra il margine prima dello spegnimento per luce naturale, per ignorare picchi brevi."
+  ],
+  "set_lux_threshold": [
+   "Imposta soglia lux",
+   "Legge ora il sensore di luminosità e salva quel valore come nuova soglia lux. Usalo quando la stanza ha il livello di luce al quale le luci devono iniziare ad accendersi."
+  ]
+ },
+ "fr": {
+  "occupancy_timeout": [
+   "Délai d'occupation",
+   "Compte à rebours avant extinction. Il démarre à la fin de la présence (occupation inactive, ou mouvement inactif sans capteur d'occupation), redémarre à chaque mouvement et s'annule au retour de l'occupation. À l'échéance, le préavis commence. Multiplié par le facteur adaptatif dans les zones de passage."
+  ],
+  "failsafe_timeout": [
+   "Délai de sécurité",
+   "Filet de sécurité : sans mouvement pendant ce temps, tout est éteint, relais compris (protège contre un capteur d'occupation bloqué). Redémarre à chaque mouvement. Ignoré en forçage permanent."
+  ],
+  "perm_override_timeout": [
+   "Délai forçage permanent",
+   "Durée maximale du forçage permanent (double clic). À l'échéance, la lumière s'éteint et le mode automatique reprend."
+  ],
+  "temp_override_timeout": [
+   "Délai forçage temporaire",
+   "En forçage temporaire (clic simple), chaque clic inverse la lumière et relance cette minuterie. À l'échéance, le mode automatique reprend : allumée si la pièce est occupée et sombre, sinon éteinte. 0 = n'expire jamais seul."
+  ],
+  "warning_dim_pct": [
+   "Préavis : luminosité",
+   "Avant l'extinction, les ampoules baissent à ce pourcentage de la luminosité actuelle pour avertir les personnes encore présentes. Tout mouvement ou occupation annule le préavis et rétablit la luminosité. Effectif uniquement avec des ampoules connectées."
+  ],
+  "warning_dim_duration": [
+   "Préavis : durée",
+   "Durée pendant laquelle la lumière reste baissée avant de s'éteindre."
+  ],
+  "lux_threshold": [
+   "Seuil lux",
+   "Niveau de lumière ambiante sous lequel le mouvement allume la lumière. Si la lumière est allumée, que la mesure atteint cette valeur et que l'occupation est inactive, la lumière s'éteint. Astuce : le bouton « Définir le seuil lux » enregistre la mesure actuelle."
+  ],
+  "adaptive_window": [
+   "Fenêtre adaptative",
+   "Fenêtre glissante dans laquelle les allumages automatiques sont comptés pour détecter une zone de passage."
+  ],
+  "adaptive_threshold": [
+   "Seuil adaptatif",
+   "Nombre d'allumages dans la fenêtre au-delà duquel le délai d'occupation commence à s'allonger."
+  ],
+  "adaptive_multiplier": [
+   "Multiplicateur adaptatif",
+   "Chaque allumage au-delà du seuil multiplie le délai d'occupation par ce facteur (facteur = multiplicateur ^ allumages en excès). Exemple : 1,5 avec 2 allumages en excès → ×2,25."
+  ],
+  "adaptive_max_factor": [
+   "Facteur adaptatif maximal",
+   "Limite supérieure de l'allongement (ex. 4,0 → au plus 4× le délai d'occupation). À chaque échéance normale du délai, la part en excès du facteur est divisée par deux."
+  ],
+  "lux_hysteresis_pct": [
+   "Marge lumière naturelle",
+   "Extinction par lumière naturelle : lumière allumée en profil normal, si la luminosité dépasse seuil × (1 + marge/100), la lumière s'éteint même si la pièce est occupée (ex. volets ouverts)."
+  ],
+  "lux_hysteresis_time": [
+   "Délai lumière naturelle",
+   "Secondes pendant lesquelles la mesure doit rester au-dessus de la marge avant l'extinction, pour ignorer les pics brefs."
+  ],
+  "set_lux_threshold": [
+   "Définir le seuil lux",
+   "Lit maintenant le capteur de luminosité et enregistre cette valeur comme nouveau seuil lux. À utiliser quand la pièce a le niveau de lumière auquel l'éclairage doit commencer à s'allumer."
+  ]
+ },
+ "es": {
+  "occupancy_timeout": [
+   "Tiempo de ocupación",
+   "Cuenta atrás antes del apagado. Empieza cuando termina la presencia (ocupación inactiva, o movimiento inactivo si no hay sensor de ocupación), se reinicia con cada movimiento y se cancela si vuelve la ocupación. Al vencer empieza el aviso previo. Se multiplica por el factor adaptativo en zonas de paso."
+  ],
+  "failsafe_timeout": [
+   "Tiempo de seguridad",
+   "Red de seguridad: sin movimiento durante este tiempo se apaga todo, relé incluido (protege ante un sensor de ocupación bloqueado). Se reinicia con cada movimiento. Se ignora en anulación permanente."
+  ],
+  "perm_override_timeout": [
+   "Tiempo anulación permanente",
+   "Duración máxima de la anulación permanente (doble clic). Al vencer, la luz se apaga y vuelve el modo automático."
+  ],
+  "temp_override_timeout": [
+   "Tiempo anulación temporal",
+   "En anulación temporal (clic simple) cada clic invierte la luz y reinicia este temporizador. Al vencer vuelve el modo automático: encendida si el área está ocupada y oscura, si no apagada. 0 = nunca vence por sí sola."
+  ],
+  "warning_dim_pct": [
+   "Aviso: brillo",
+   "Antes de apagar, las bombillas bajan a este porcentaje del brillo actual para avisar a quien siga en la sala. Cualquier movimiento u ocupación cancela el aviso y restaura el brillo. Solo es efectivo con bombillas inteligentes."
+  ],
+  "warning_dim_duration": [
+   "Aviso: duración",
+   "Tiempo que la luz permanece atenuada antes de apagarse."
+  ],
+  "lux_threshold": [
+   "Umbral lux",
+   "Nivel de luz ambiente por debajo del cual el movimiento enciende la luz. Si la luz está encendida, la lectura alcanza este valor y la ocupación está inactiva, la luz se apaga. Consejo: el botón «Fijar umbral lux» guarda la lectura actual."
+  ],
+  "adaptive_window": [
+   "Ventana adaptativa",
+   "Ventana de tiempo móvil en la que se cuentan los encendidos automáticos para detectar una zona de paso."
+  ],
+  "adaptive_threshold": [
+   "Umbral adaptativo",
+   "Número de encendidos en la ventana a partir del cual el tiempo de ocupación empieza a alargarse."
+  ],
+  "adaptive_multiplier": [
+   "Multiplicador adaptativo",
+   "Cada encendido por encima del umbral multiplica el tiempo de ocupación por este factor (factor = multiplicador ^ encendidos en exceso). Ejemplo: 1,5 con 2 encendidos en exceso → ×2,25."
+  ],
+  "adaptive_max_factor": [
+   "Factor adaptativo máximo",
+   "Límite superior del alargamiento (p. ej. 4,0 → como máximo 4× el tiempo de ocupación). Cada vez que el tiempo vence con normalidad, la parte en exceso del factor se reduce a la mitad."
+  ],
+  "lux_hysteresis_pct": [
+   "Margen luz natural",
+   "Apagado por luz natural: con la luz encendida en perfil normal, si la luz ambiente supera umbral × (1 + margen/100) la luz se apaga aunque el área esté ocupada (p. ej. persianas abiertas)."
+  ],
+  "lux_hysteresis_time": [
+   "Retardo luz natural",
+   "Segundos que la lectura debe permanecer por encima del margen antes del apagado, para ignorar picos breves."
+  ],
+  "set_lux_threshold": [
+   "Fijar umbral lux",
+   "Lee ahora el sensor de luminosidad y guarda ese valor como nuevo umbral lux. Úsalo cuando la sala tenga el nivel de luz al que las luces deben empezar a encenderse."
+  ]
+ },
+ "de": {
+  "occupancy_timeout": [
+   "Belegungszeit",
+   "Countdown bis zum Ausschalten. Er startet, wenn die Anwesenheit endet (Belegungssensor inaktiv, oder Bewegung inaktiv ohne Belegungssensor), startet bei jeder Bewegung neu und wird abgebrochen, wenn die Belegung zurückkehrt. Danach beginnt die Vorwarnung. Wird in Durchgangsbereichen mit dem adaptiven Faktor multipliziert."
+  ],
+  "failsafe_timeout": [
+   "Sicherheitszeit",
+   "Sicherheitsnetz: Ohne Bewegung für diese Zeit wird alles ausgeschaltet, inklusive Relais (schützt vor einem hängenden Belegungssensor). Startet bei jeder Bewegung neu. Wird bei permanenter Übersteuerung ignoriert."
+  ],
+  "perm_override_timeout": [
+   "Dauer permanente Übersteuerung",
+   "Maximale Dauer der permanenten Übersteuerung (Doppelklick). Danach schaltet das Licht aus und der Automatikbetrieb wird fortgesetzt."
+  ],
+  "temp_override_timeout": [
+   "Dauer temporäre Übersteuerung",
+   "In der temporären Übersteuerung (Einzelklick) schaltet jeder Klick das Licht um und startet diesen Timer neu. Danach wird der Automatikbetrieb fortgesetzt: Licht an, wenn der Bereich belegt und dunkel ist, sonst aus. 0 = läuft nie von selbst ab."
+  ],
+  "warning_dim_pct": [
+   "Vorwarnung: Helligkeit",
+   "Vor dem Ausschalten werden die Lampen auf diesen Prozentsatz der aktuellen Helligkeit gedimmt, um Anwesende zu warnen. Jede Bewegung oder Belegung bricht die Vorwarnung ab und stellt die Helligkeit wieder her. Nur mit smarten Lampen wirksam."
+  ],
+  "warning_dim_duration": [
+   "Vorwarnung: Dauer",
+   "Wie lange das Licht gedimmt bleibt, bevor es ausschaltet."
+  ],
+  "lux_threshold": [
+   "Lux-Schwelle",
+   "Umgebungslicht, unterhalb dessen Bewegung das Licht einschaltet. Ist das Licht an, erreicht der Messwert diesen Wert und ist der Belegungssensor inaktiv, schaltet das Licht aus. Tipp: Die Schaltfläche „Lux-Schwelle setzen“ übernimmt den aktuellen Messwert."
+  ],
+  "adaptive_window": [
+   "Adaptives Fenster",
+   "Gleitendes Zeitfenster, in dem automatische Einschaltungen gezählt werden, um einen Durchgangsbereich zu erkennen."
+  ],
+  "adaptive_threshold": [
+   "Adaptive Schwelle",
+   "Anzahl der Einschaltungen im Fenster, ab der die Belegungszeit verlängert wird."
+  ],
+  "adaptive_multiplier": [
+   "Adaptiver Multiplikator",
+   "Jede Einschaltung über der Schwelle multipliziert die Belegungszeit mit diesem Faktor (Faktor = Multiplikator ^ überzählige Einschaltungen). Beispiel: 1,5 bei 2 überzähligen Einschaltungen → ×2,25."
+  ],
+  "adaptive_max_factor": [
+   "Maximaler adaptiver Faktor",
+   "Obergrenze der Verlängerung (z. B. 4,0 → höchstens 4× die Belegungszeit). Bei jedem normalen Ablauf der Belegungszeit wird der überzählige Anteil des Faktors halbiert."
+  ],
+  "lux_hysteresis_pct": [
+   "Tageslicht-Spanne",
+   "Abschaltung bei Tageslicht: Ist das Licht im Normalprofil an und übersteigt das Umgebungslicht Schwelle × (1 + Spanne/100), schaltet es aus, auch wenn der Bereich belegt ist (z. B. Rollläden geöffnet)."
+  ],
+  "lux_hysteresis_time": [
+   "Tageslicht-Verzögerung",
+   "Sekunden, die der Messwert über der Spanne bleiben muss, bevor wegen Tageslicht abgeschaltet wird, um kurze Spitzen zu ignorieren."
+  ],
+  "set_lux_threshold": [
+   "Lux-Schwelle setzen",
+   "Liest jetzt den Helligkeitssensor und speichert diesen Wert als neue Lux-Schwelle. Nutze es, wenn der Raum die Helligkeit hat, ab der das Licht einschalten soll."
+  ]
+ }
+};
+/* END SL_PARAMS */
 
 class SmartLightingCard extends HTMLElement {
 
@@ -105,6 +356,9 @@ class SmartLightingCard extends HTMLElement {
   }
 
   _t(k) { var d=SL_I18N[this._lang]||SL_I18N.en; return d[k]||(SL_I18N.en[k]||k); }
+
+  /* Parameter [label, help] in the HA language, English fallback [Spec §19] */
+  _p(k) { var d=SL_PARAMS[this._lang]||SL_PARAMS.en; return d[k]||SL_PARAMS.en[k]||[k,""]; }
 
   setConfig(config) {
     if (!config.area) throw new Error("'area' is required");
@@ -236,8 +490,14 @@ class SmartLightingCard extends HTMLElement {
       ".md{background:var(--ha-card-background,var(--card-background-color,#fff));border-radius:12px;padding:20px;min-width:300px;max-width:400px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.3);color:var(--primary-text-color,#212121)}",
       ".mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:18px;font-weight:500}",
       ".mh ha-icon{cursor:pointer;--mdc-icon-size:20px;color:var(--secondary-text-color,#727272)}",
-      ".mr{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--divider-color,#e0e0e0)}",
-      ".mr:last-of-type{border-bottom:none}",
+      ".pw{border-bottom:1px solid var(--divider-color,#e0e0e0)}",
+      ".pw:last-of-type{border-bottom:none}",
+      ".mr{display:flex;align-items:center;justify-content:space-between;padding:9px 0}",
+      /* (i) help toggle + help text [Spec §19] */
+      ".hi{--mdc-icon-size:16px;color:var(--secondary-text-color,#727272);cursor:pointer;margin-left:4px;vertical-align:middle;-webkit-tap-highlight-color:transparent}",
+      ".hi.on{color:var(--primary-color,#03a9f4)}",
+      ".ht{display:none;font-size:12px;line-height:1.4;color:var(--secondary-text-color,#727272);padding:0 0 9px 0}",
+      ".ht.op{display:block}",
       ".ml{font-size:13px;flex:1}",
       ".mv{display:flex;align-items:center;gap:5px}",
       ".mv input{width:68px;padding:3px 6px;border:1px solid var(--divider-color,#e0e0e0);border-radius:5px;background:transparent;color:var(--primary-text-color,#212121);font-size:13px;text-align:right;-webkit-appearance:none}",
@@ -494,13 +754,13 @@ class SmartLightingCard extends HTMLElement {
     var settings=[
       {e:this._ent.occupancy_timeout,     k:"occupancy_timeout",    u:"s",  s:10},
       {e:this._ent.failsafe_timeout,      k:"failsafe_timeout",     u:"s",  s:60},
-      {e:this._ent.perm_override_timeout,  k:"override_timeout",     u:"s",  s:60},
+      {e:this._ent.perm_override_timeout,  k:"perm_override_timeout",u:"s",  s:60},
       {e:this._ent.temp_override_timeout,  k:"temp_override_timeout",u:"s",  s:60},
       {e:this._ent.warning_dim_pct,       k:"warning_dim_pct",      u:"%",  s:5},
       {e:this._ent.warning_dim_duration,  k:"warning_dim_duration",  u:"s",  s:1},
       {e:this._ent.lux_threshold,         k:"lux_threshold",        u:"lx", s:1},
       {e:this._ent.adaptive_window,       k:"adaptive_window",      u:"s",  s:60},
-      {e:this._ent.adaptive_threshold_n,  k:"adaptive_threshold_n", u:"",   s:1},
+      {e:this._ent.adaptive_threshold_n,  k:"adaptive_threshold",   u:"",   s:1},
       {e:this._ent.adaptive_multiplier,   k:"adaptive_multiplier",  u:"",   s:0.1},
       {e:this._ent.adaptive_max_factor,   k:"adaptive_max_factor",  u:"",   s:0.5},
       {e:this._ent.lux_hysteresis_pct,    k:"lux_hysteresis_pct",   u:"%",  s:1},
@@ -524,23 +784,39 @@ class SmartLightingCard extends HTMLElement {
     for (var i=0;i<settings.length;i++) {
       var c=settings[i], so=this._hass.states[c.e]; if(!so)continue;
       var v=parseFloat(so.state)||0, mn=so.attributes.min||0, mx=so.attributes.max||99999;
+      var pt=this._p(c.k);
+      var pw=document.createElement("div"); pw.className="pw";
       var row=document.createElement("div"); row.className="mr";
-      var lbl=document.createElement("span"); lbl.className="ml"; lbl.textContent=this._t(c.k); row.appendChild(lbl);
+      var lbl=document.createElement("span"); lbl.className="ml"; lbl.textContent=pt[0];
+      var help=this._helpRow(lbl, pt[1]); row.appendChild(lbl);
       var vd=document.createElement("div"); vd.className="mv";
       var inp=document.createElement("input"); inp.type="number"; inp.value=v; inp.min=mn; inp.max=mx; inp.step=c.s;
       vd.appendChild(inp);
       var un=document.createElement("span"); un.className="mu"; un.textContent=c.u; vd.appendChild(un);
-      row.appendChild(vd); body.appendChild(row);
+      row.appendChild(vd); pw.appendChild(row); if(help)pw.appendChild(help); body.appendChild(pw);
       (function(entity){inp.addEventListener("change",function(ev){var nv=parseFloat(ev.target.value);if(!isNaN(nv))self._hass.callService("number","set_value",{entity_id:entity,value:nv});});})(c.e);
     }
 
     /* button */
     var btn=document.createElement("button"); btn.className="lb";
     var btnI=document.createElement("ha-icon"); btnI.setAttribute("icon","mdi:brightness-auto"); btn.appendChild(btnI);
-    btn.appendChild(document.createTextNode(" "+this._t("set_lux")));
+    var bp=this._p("set_lux_threshold");
+    btn.appendChild(document.createTextNode(" "+bp[0]));
     btn.addEventListener("click",function(){self._hass.callService("button","press",{entity_id:self._ent.set_lux_threshold});});
     body.appendChild(btn);
+    if (bp[1]) { var bh=document.createElement("div"); bh.className="ht op"; bh.textContent=bp[1]; bh.style.paddingTop="8px"; body.appendChild(bh); }
     ov.classList.add("op");
+  }
+
+  /* Append an (i) icon to the label and return the hidden help element
+     it toggles; null when there is no help text [Spec §19] */
+  _helpRow(lbl, text) {
+    if (!text) return null;
+    var ht=document.createElement("div"); ht.className="ht"; ht.textContent=text;
+    var hi=document.createElement("ha-icon"); hi.className="hi"; hi.setAttribute("icon","mdi:information-outline");
+    hi.addEventListener("click",function(ev){ ev.stopPropagation(); ht.classList.toggle("op"); hi.classList.toggle("on"); });
+    lbl.appendChild(hi);
+    return ht;
   }
 
   _closeM() { var ov=this.shadowRoot.getElementById("V"); if(ov)ov.classList.remove("op"); }
@@ -549,4 +825,4 @@ class SmartLightingCard extends HTMLElement {
 customElements.define("smart-lighting-card",SmartLightingCard);
 window.customCards=window.customCards||[];
 window.customCards.push({type:"smart-lighting-card",name:"Smart Lighting Card",description:"Smart lighting with dual timer bars, state indicator, profile/actuator/suspend badge",preview:true});
-console.info("%c SMART-LIGHTING-CARD %c v11 ","color:#fff;background:#03a9f4;font-weight:700;padding:2px 6px;border-radius:3px 0 0 3px","color:#03a9f4;background:#e3f2fd;padding:2px 6px;border-radius:0 3px 3px 0");
+console.info("%c SMART-LIGHTING-CARD %c v12 ","color:#fff;background:#03a9f4;font-weight:700;padding:2px 6px;border-radius:3px 0 0 3px","color:#03a9f4;background:#e3f2fd;padding:2px 6px;border-radius:0 3px 3px 0");

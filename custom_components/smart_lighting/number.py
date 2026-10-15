@@ -3,22 +3,58 @@
 Exposes runtime-adjustable configuration values as number entities.
 Changes take effect immediately without requiring integration reload.
 
-Entities:
-- Occupancy timeout [Spec §3]
-- Failsafe timeout [Spec §8]
-- Warning dim percentage [Spec §6]
-- Warning dim duration [Spec §6]
+Entities: one per runtime parameter (timeouts, warning dim, lux threshold,
+adaptive timeout, natural-light auto-off) [Spec §3, §6, §8, §9, §9b, §17].
+
+Each entity exposes a ``description`` attribute: the same help text shown
+under the field in the config flow (``data_description``), in the HA
+language, English fallback. Excluded from the recorder [Spec §19].
 """
 
 from __future__ import annotations
 
+import logging
+from typing import Any
+
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, UnitOfTime
-from homeassistant.core import HomeAssistant
+from homeassistant.const import (
+    EVENT_CORE_CONFIG_UPDATE,
+    EntityCategory,
+    UnitOfTime,
+)
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.translation import async_get_translations
 
 from .const import CONF_AREA_NAME, DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
+
+# Attribute carrying the parameter help text [Spec §19]
+ATTR_DESCRIPTION = "description"
+
+# Config flow step whose data_description documents each key [Spec §19].
+# Only lux_threshold lives in "sensors"; all others are in "timings".
+_DESCRIPTION_STEP = {"lux_threshold": "sensors"}
+
+
+async def _async_load_description(hass: HomeAssistant, key: str) -> str | None:
+    """Return the data_description of ``key`` in the HA language.
+
+    Reads the integration's ``config`` translations, so the text is the
+    same one shown in the config/options flow. Falls back to English.
+    """
+    step = _DESCRIPTION_STEP.get(key, "timings")
+    tkey = f"component.{DOMAIN}.config.step.{step}.data_description.{key}"
+    for language in dict.fromkeys((hass.config.language, "en")):
+        translations = await async_get_translations(
+            hass, language, "config", [DOMAIN]
+        )
+        if text := translations.get(tkey):
+            return text
+    _LOGGER.debug("No description translation for %s", key)
+    return None
 
 
 async def async_setup_entry(
@@ -139,6 +175,8 @@ class SmartLightingNumber(NumberEntity):
     _attr_should_poll = False
     _attr_entity_category = EntityCategory.CONFIG
     _attr_mode = NumberMode.BOX
+    # Static help text: keep it out of the recorder database [Spec §19]
+    _unrecorded_attributes = frozenset({ATTR_DESCRIPTION})
 
     def __init__(
         self,
@@ -179,6 +217,41 @@ class SmartLightingNumber(NumberEntity):
         self._attr_native_step = step
         if unit:
             self._attr_native_unit_of_measurement = unit
+        self._description: str | None = None
+
+    async def async_added_to_hass(self) -> None:
+        """Load the help text and reload it when the HA language changes."""
+        await self._async_refresh_description()
+
+        @callback
+        def _on_core_config_update(event: Event) -> None:
+            # Language may have changed in Settings > General [Spec §19]
+            self.hass.async_create_task(self._async_refresh_description())
+
+        self.async_on_remove(
+            self.hass.bus.async_listen(
+                EVENT_CORE_CONFIG_UPDATE, _on_core_config_update
+            )
+        )
+
+    async def _async_refresh_description(self) -> None:
+        """Fetch the localized description and publish it."""
+        description = await _async_load_description(self.hass, self._config_key)
+        if description != self._description:
+            self._description = description
+            _LOGGER.debug(
+                "Description loaded for %s (%s)",
+                self.entity_id, self.hass.config.language,
+            )
+            if self.hass is not None and self.entity_id:
+                self.async_write_ha_state()
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Expose the parameter help text [Spec §19]."""
+        if self._description is None:
+            return None
+        return {ATTR_DESCRIPTION: self._description}
 
     @property
     def native_value(self) -> float:

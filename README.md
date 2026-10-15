@@ -147,7 +147,7 @@ Each area creates a device *Smart Lighting &lt;Area&gt;* with these entities (en
 
 ### Numbers (config, runtime, persistent)
 
-`number.*_<key>` for every timing of step 4 plus `lux_threshold`: `occupancy_timeout`, `failsafe_timeout`, `perm_override_timeout`, `temp_override_timeout`, `warning_dim_pct`, `warning_dim_duration`, `lux_threshold`, `adaptive_window`, `adaptive_threshold`, `adaptive_multiplier`, `adaptive_max_factor`, `lux_hysteresis_pct`, `lux_hysteresis_time`. Same meaning as the table above; changes apply immediately and are saved in the entry.
+`number.*_<key>` for every timing of step 4 plus `lux_threshold`: `occupancy_timeout`, `failsafe_timeout`, `perm_override_timeout`, `temp_override_timeout`, `warning_dim_pct`, `warning_dim_duration`, `lux_threshold`, `adaptive_window`, `adaptive_threshold`, `adaptive_multiplier`, `adaptive_max_factor`, `lux_hysteresis_pct`, `lux_hysteresis_time`. Same meaning as the table above; changes apply immediately and are saved in the entry. Each number entity also has a `description` attribute with the same help text, in the HA language (Attributes section of the entity dialog; not stored in history).
 
 ### Button
 
@@ -200,7 +200,7 @@ icon_main: mdi:ceiling-light    # optional, normal profile icon
 icon_soft: mdi:lamp             # optional, soft profile icon
 ```
 
-Timer bar, large toggle icon, mode indicator, motion/occupancy/lux icons (tap = more-info) and a settings popup with all number entities and the *Set lux threshold* button.
+Timer bar, large toggle icon, mode indicator, motion/occupancy/lux icons (tap = more-info) and a settings popup with all number entities and the *Set lux threshold* button. Tap ⓘ next to a parameter to show what it does (same text as the configuration form, in the HA language).
 
 ## Example automation
 
