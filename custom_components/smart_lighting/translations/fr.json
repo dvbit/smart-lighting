@@ -2,133 +2,296 @@
   "config": {
     "step": {
       "user": {
-        "title": "Sélection de zone",
-        "description": "Sélectionnez la zone Home Assistant à configurer.",
+        "title": "Pièce",
+        "description": "Choisissez la pièce Home Assistant gérée par ce contrôleur. Les étapes suivantes ne listent que les entités de cette pièce.",
         "data": {
-          "area_id": "Zone"
+          "area_id": "Pièce"
+        },
+        "data_description": {
+          "area_id": "Pièce Home Assistant gérée par ce contrôleur. Son nom devient le nom de l'appareil ; les sélecteurs des étapes suivantes sont filtrés sur elle."
         }
       },
       "sensors": {
         "title": "Capteurs",
-        "description": "Sélectionnez les capteurs pour cette zone.",
+        "description": "Capteurs de présence et de luminosité ambiante qui pilotent l'automatisation. Les capteurs de mouvement, d'occupation et de luminosité sont obligatoires.",
         "data": {
           "motion_sensors": "Capteurs de mouvement",
-          "occupancy_sensor": "Capteur de présence",
+          "occupancy_sensor": "Capteur d'occupation",
           "lux_sensor": "Capteur de luminosité",
-          "lux_threshold": "Seuil de luminosité"
+          "lux_threshold": "Seuil lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Un ou plusieurs binary_sensor (ex. PIR). Il suffit qu'un capteur s'active (logique OU) pour allumer, si la luminosité ambiante est sous le seuil lux. Chaque mouvement relance aussi le compte à rebours d'occupation et la minuterie de sécurité, et annule le préavis.",
+          "occupancy_sensor": "Binary_sensor de présence statique (ex. mmWave). Tant qu'il est actif, le compte à rebours d'extinction est suspendu ; quand il se désactive, le délai d'occupation démarre. Il indique aussi si la pièce est encore occupée à la fin d'un forçage temporaire.",
+          "lux_sensor": "Capteur de lumière ambiante en lux. La lumière ne s'allume que si la mesure est sous le seuil lux. S'il est indisponible ou non numérique, la pièce est considérée sombre.",
+          "lux_threshold": "Niveau de lumière ambiante sous lequel le mouvement allume la lumière. Si la lumière est allumée, que la mesure atteint cette valeur et que l'occupation est inactive, la lumière s'éteint. Astuce : le bouton « Définir le seuil lux » enregistre la mesure actuelle."
         }
       },
       "actuators": {
         "title": "Actionneurs",
-        "description": "Configurez les entités lumière et relais. Au moins un est requis.",
+        "description": "Entités commandées par le contrôleur, plus les entrées facultatives de forçage et de suspension. Au moins une ampoule connectée ou un relais est requis.",
         "data": {
-          "bulb_entity": "Ampoules connectées (optionnel)",
-          "relay_entity": "Relais (optionnel)",
-          "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
-          "soft_relay_entity": "Relais profil tamisé (optionnel)",
-          "suspend_entity": "Entité de suspension (optionnel)",
-          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
+          "bulb_entity": "Ampoules connectées",
+          "relay_entity": "Relais",
+          "physical_interaction_sensor": "Capteur d'interaction physique",
+          "soft_bulb_entity": "Ampoules profil doux",
+          "soft_relay_entity": "Relais profil doux",
+          "suspend_entity": "Entité de suspension"
+        },
+        "data_description": {
+          "bulb_entity": "Facultatif. Une ou plusieurs entités light, toutes allumées avec la luminosité du profil actif. Si un relais est aussi défini, à l'extinction seules les ampoules s'éteignent et le relais reste allumé pour qu'elles restent joignables.",
+          "relay_entity": "Switch facultatif qui alimente le circuit. Sans ampoules, il est allumé/éteint directement. Avec des ampoules, il est allumé avec elles et laissé allumé à l'extinction ; seule la sécurité l'éteint.",
+          "physical_interaction_sensor": "Binary_sensor facultatif de l'intégration whodidit. À la fermeture de la fenêtre de clics (on → off), l'attribut click_count est lu : 1 clic = forçage temporaire, 2 clics = entrée/sortie du forçage permanent, 3 ou plus = ignorés.",
+          "soft_bulb_entity": "Facultatif. Entités light utilisées à la place des ampoules connectées quand le profil doux est actif (ex. une veilleuse). Sans ampoules ni relais doux, les actionneurs normaux sont utilisés.",
+          "soft_relay_entity": "Facultatif. Switch utilisé à la place du relais quand le profil doux est actif. Mêmes règles que le relais principal.",
+          "suspend_entity": "Binary_sensor ou input_boolean facultatif. Quand il est actif, l'automatisation est en pause : minuteries annulées, lumière laissée telle quelle et événements ignorés (ex. mode cinéma). À sa désactivation, mouvement et lux sont réévalués."
         }
       },
       "timings": {
         "title": "Temporisations",
-        "description": "Configurez les délais et les paramètres d'avertissement.",
+        "description": "Minuteries d'extinction, préavis, délai adaptatif et extinction par lumière naturelle. Chaque valeur est aussi modifiable plus tard via les entités nombre de l'appareil, sans reconfigurer.",
         "data": {
-          "occupancy_timeout": "Délai présence — secondes après le dernier mouvement avant l'atténuation d'avertissement",
-          "failsafe_timeout": "Délai sécurité — secondes sans mouvement avant extinction forcée (réinitialise à chaque mouvement)",
-          "adaptive_window": "Fenêtre adaptative — fenêtre glissante (s) pour compter les activations",
-          "adaptive_threshold": "Seuil adaptatif — activations dans la fenêtre avant d'étendre le délai",
-          "adaptive_multiplier": "Multiplicateur adaptatif — facteur par activation extra (ex. 1.5 = 50% de plus)",
-          "adaptive_max_factor": "Facteur max adaptatif — plafond d'extension (ex. 4.0 = 4× maximum)",
-          "perm_override_timeout": "Délai override permanent — sortie auto après N secondes (0 = n'expire jamais)",
-          "lux_hysteresis_pct": "Hystérésis lux % — la lux doit dépasser le seuil de ce % pour déclencher l'extinction lumière naturelle",
-          "lux_hysteresis_time": "Temps hystérésis lux — secondes que la lux doit rester haute avant l'extinction",
-          "temp_override_timeout": "Délai override temp. — retour auto après N secondes d'inactivité (0 = jamais, reste jusqu'au prochain clic)",
-          "warning_dim_pct": "Atténuation % — luminosité pendant l'atténuation pré-extinction (ex. 30 = 30%)",
-          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)"
+          "occupancy_timeout": "Délai d'occupation (s)",
+          "failsafe_timeout": "Délai de sécurité (s)",
+          "perm_override_timeout": "Délai forçage permanent (s)",
+          "temp_override_timeout": "Délai forçage temporaire (s)",
+          "warning_dim_pct": "Préavis : luminosité (%)",
+          "warning_dim_duration": "Préavis : durée (s)",
+          "adaptive_window": "Fenêtre adaptative (s)",
+          "adaptive_threshold": "Seuil adaptatif",
+          "adaptive_multiplier": "Multiplicateur adaptatif",
+          "adaptive_max_factor": "Facteur adaptatif maximal",
+          "lux_hysteresis_pct": "Marge lumière naturelle (%)",
+          "lux_hysteresis_time": "Délai lumière naturelle (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Compte à rebours avant extinction. Il démarre à la fin de la présence (occupation inactive, ou mouvement inactif sans capteur d'occupation), redémarre à chaque mouvement et s'annule au retour de l'occupation. À l'échéance, le préavis commence. Multiplié par le facteur adaptatif dans les zones de passage.",
+          "failsafe_timeout": "Filet de sécurité : sans mouvement pendant ce temps, tout est éteint, relais compris (protège contre un capteur d'occupation bloqué). Redémarre à chaque mouvement. Ignoré en forçage permanent.",
+          "perm_override_timeout": "Durée maximale du forçage permanent (double clic). À l'échéance, la lumière s'éteint et le mode automatique reprend.",
+          "temp_override_timeout": "En forçage temporaire (clic simple), chaque clic inverse la lumière et relance cette minuterie. À l'échéance, le mode automatique reprend : allumée si la pièce est occupée et sombre, sinon éteinte. 0 = n'expire jamais seul.",
+          "warning_dim_pct": "Avant l'extinction, les ampoules baissent à ce pourcentage de la luminosité actuelle pour avertir les personnes encore présentes. Tout mouvement ou occupation annule le préavis et rétablit la luminosité. Effectif uniquement avec des ampoules connectées.",
+          "warning_dim_duration": "Durée pendant laquelle la lumière reste baissée avant de s'éteindre.",
+          "adaptive_window": "Fenêtre glissante dans laquelle les allumages automatiques sont comptés pour détecter une zone de passage.",
+          "adaptive_threshold": "Nombre d'allumages dans la fenêtre au-delà duquel le délai d'occupation commence à s'allonger.",
+          "adaptive_multiplier": "Chaque allumage au-delà du seuil multiplie le délai d'occupation par ce facteur (facteur = multiplicateur ^ allumages en excès). Exemple : 1,5 avec 2 allumages en excès → ×2,25.",
+          "adaptive_max_factor": "Limite supérieure de l'allongement (ex. 4,0 → au plus 4× le délai d'occupation). À chaque échéance normale du délai, la part en excès du facteur est divisée par deux.",
+          "lux_hysteresis_pct": "Extinction par lumière naturelle : lumière allumée en profil normal, si la luminosité dépasse seuil × (1 + marge/100), la lumière s'éteint même si la pièce est occupée (ex. volets ouverts).",
+          "lux_hysteresis_time": "Secondes pendant lesquelles la mesure doit rester au-dessus de la marge avant l'extinction, pour ignorer les pics brefs."
         }
       },
       "profiles": {
         "title": "Profils de luminosité",
-        "description": "Configurez les profils de luminosité normale et tamisée.",
+        "description": "Luminosité utilisée à l'allumage automatique : profil normal, ou profil doux (ex. la nuit) choisi par plage horaire ou par une entité.",
         "data": {
           "brightness_normal": "Luminosité normale",
-          "brightness_soft": "Luminosité tamisée",
-          "profile_mode": "Déclencheur du profil tamisé",
-          "soft_time_start": "Début plage tamisée",
-          "soft_time_end": "Fin plage tamisée",
-          "soft_entity": "Entité profil tamisé"
+          "brightness_soft": "Luminosité douce",
+          "profile_mode": "Activation du profil doux",
+          "soft_time_start": "Début du profil doux",
+          "soft_time_end": "Fin du profil doux",
+          "soft_entity": "Entité du profil doux"
+        },
+        "data_description": {
+          "brightness_normal": "Luminosité (1–255) du profil normal. 255 = 100 %.",
+          "brightness_soft": "Luminosité (1–255) utilisée quand le profil doux est actif, ex. la nuit. 100 ≈ 40 %.",
+          "profile_mode": "Comment le profil doux est choisi : « Plage horaire » utilise le début et la fin ci-dessous ; « Entité » suit l'entité du profil doux.",
+          "soft_time_start": "Mode plage horaire uniquement. Heure de début du profil doux. Les plages passant minuit sont acceptées (ex. 20:00–08:00).",
+          "soft_time_end": "Mode plage horaire uniquement. Heure de fin du profil doux.",
+          "soft_entity": "Mode entité uniquement. Binary_sensor ou input_boolean : quand il est actif, le profil doux est actif (ex. une entrée « mode nuit »)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "Au moins un actionneur (ampoule ou relais) est requis."
+      "at_least_one_actuator": "Au moins un actionneur est requis : ampoules connectées ou relais."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Sélection de zone",
-        "description": "Changer la zone configurée.",
+        "title": "Pièce",
+        "description": "Choisissez la pièce Home Assistant gérée par ce contrôleur. Les étapes suivantes ne listent que les entités de cette pièce. L'enregistrement recharge l'intégration et redémarre toutes les minuteries.",
         "data": {
-          "area_id": "Zone"
+          "area_id": "Pièce"
+        },
+        "data_description": {
+          "area_id": "Pièce Home Assistant gérée par ce contrôleur. Son nom devient le nom de l'appareil ; les sélecteurs des étapes suivantes sont filtrés sur elle."
         }
       },
       "sensors": {
         "title": "Capteurs",
-        "description": "Mettre à jour les capteurs.",
+        "description": "Capteurs de présence et de luminosité ambiante qui pilotent l'automatisation. Les capteurs de mouvement, d'occupation et de luminosité sont obligatoires.",
         "data": {
           "motion_sensors": "Capteurs de mouvement",
-          "occupancy_sensor": "Capteur de présence",
+          "occupancy_sensor": "Capteur d'occupation",
           "lux_sensor": "Capteur de luminosité",
-          "lux_threshold": "Seuil de luminosité"
+          "lux_threshold": "Seuil lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Un ou plusieurs binary_sensor (ex. PIR). Il suffit qu'un capteur s'active (logique OU) pour allumer, si la luminosité ambiante est sous le seuil lux. Chaque mouvement relance aussi le compte à rebours d'occupation et la minuterie de sécurité, et annule le préavis.",
+          "occupancy_sensor": "Binary_sensor de présence statique (ex. mmWave). Tant qu'il est actif, le compte à rebours d'extinction est suspendu ; quand il se désactive, le délai d'occupation démarre. Il indique aussi si la pièce est encore occupée à la fin d'un forçage temporaire.",
+          "lux_sensor": "Capteur de lumière ambiante en lux. La lumière ne s'allume que si la mesure est sous le seuil lux. S'il est indisponible ou non numérique, la pièce est considérée sombre.",
+          "lux_threshold": "Niveau de lumière ambiante sous lequel le mouvement allume la lumière. Si la lumière est allumée, que la mesure atteint cette valeur et que l'occupation est inactive, la lumière s'éteint. Astuce : le bouton « Définir le seuil lux » enregistre la mesure actuelle."
         }
       },
       "actuators": {
         "title": "Actionneurs",
-        "description": "Mettre à jour les entités.",
+        "description": "Entités commandées par le contrôleur, plus les entrées facultatives de forçage et de suspension. Au moins une ampoule connectée ou un relais est requis.",
         "data": {
-          "bulb_entity": "Ampoules connectées (optionnel)",
-          "relay_entity": "Relais (optionnel)",
-          "soft_bulb_entity": "Ampoules profil tamisé (optionnel)",
-          "soft_relay_entity": "Relais profil tamisé (optionnel)",
-          "suspend_entity": "Entité de suspension (optionnel)",
-          "physical_interaction_sensor": "Capteur interaction physique (optionnel)"
+          "bulb_entity": "Ampoules connectées",
+          "relay_entity": "Relais",
+          "physical_interaction_sensor": "Capteur d'interaction physique",
+          "soft_bulb_entity": "Ampoules profil doux",
+          "soft_relay_entity": "Relais profil doux",
+          "suspend_entity": "Entité de suspension"
+        },
+        "data_description": {
+          "bulb_entity": "Facultatif. Une ou plusieurs entités light, toutes allumées avec la luminosité du profil actif. Si un relais est aussi défini, à l'extinction seules les ampoules s'éteignent et le relais reste allumé pour qu'elles restent joignables.",
+          "relay_entity": "Switch facultatif qui alimente le circuit. Sans ampoules, il est allumé/éteint directement. Avec des ampoules, il est allumé avec elles et laissé allumé à l'extinction ; seule la sécurité l'éteint.",
+          "physical_interaction_sensor": "Binary_sensor facultatif de l'intégration whodidit. À la fermeture de la fenêtre de clics (on → off), l'attribut click_count est lu : 1 clic = forçage temporaire, 2 clics = entrée/sortie du forçage permanent, 3 ou plus = ignorés.",
+          "soft_bulb_entity": "Facultatif. Entités light utilisées à la place des ampoules connectées quand le profil doux est actif (ex. une veilleuse). Sans ampoules ni relais doux, les actionneurs normaux sont utilisés.",
+          "soft_relay_entity": "Facultatif. Switch utilisé à la place du relais quand le profil doux est actif. Mêmes règles que le relais principal.",
+          "suspend_entity": "Binary_sensor ou input_boolean facultatif. Quand il est actif, l'automatisation est en pause : minuteries annulées, lumière laissée telle quelle et événements ignorés (ex. mode cinéma). À sa désactivation, mouvement et lux sont réévalués."
         }
       },
       "timings": {
         "title": "Temporisations",
-        "description": "Mettre à jour les délais.",
+        "description": "Minuteries d'extinction, préavis, délai adaptatif et extinction par lumière naturelle. Chaque valeur est aussi modifiable plus tard via les entités nombre de l'appareil, sans reconfigurer.",
         "data": {
-          "occupancy_timeout": "Délai présence — secondes après le dernier mouvement avant l'atténuation d'avertissement",
-          "failsafe_timeout": "Délai sécurité — secondes sans mouvement avant extinction forcée (réinitialise à chaque mouvement)",
-          "adaptive_window": "Fenêtre adaptative — fenêtre glissante (s) pour compter les activations",
-          "adaptive_threshold": "Seuil adaptatif — activations dans la fenêtre avant d'étendre le délai",
-          "adaptive_multiplier": "Multiplicateur adaptatif — facteur par activation extra (ex. 1.5 = 50% de plus)",
-          "adaptive_max_factor": "Facteur max adaptatif — plafond d'extension (ex. 4.0 = 4× maximum)",
-          "perm_override_timeout": "Délai override permanent — sortie auto après N secondes (0 = n'expire jamais)",
-          "lux_hysteresis_pct": "Hystérésis lux % — la lux doit dépasser le seuil de ce % pour déclencher l'extinction lumière naturelle",
-          "lux_hysteresis_time": "Temps hystérésis lux — secondes que la lux doit rester haute avant l'extinction",
-          "temp_override_timeout": "Délai override temp. — retour auto après N secondes d'inactivité (0 = jamais, reste jusqu'au prochain clic)",
-          "warning_dim_pct": "Atténuation % — luminosité pendant l'atténuation pré-extinction (ex. 30 = 30%)",
-          "warning_dim_duration": "Durée atténuation — secondes d'atténuation avant extinction (0 = extinction immédiate)"
+          "occupancy_timeout": "Délai d'occupation (s)",
+          "failsafe_timeout": "Délai de sécurité (s)",
+          "perm_override_timeout": "Délai forçage permanent (s)",
+          "temp_override_timeout": "Délai forçage temporaire (s)",
+          "warning_dim_pct": "Préavis : luminosité (%)",
+          "warning_dim_duration": "Préavis : durée (s)",
+          "adaptive_window": "Fenêtre adaptative (s)",
+          "adaptive_threshold": "Seuil adaptatif",
+          "adaptive_multiplier": "Multiplicateur adaptatif",
+          "adaptive_max_factor": "Facteur adaptatif maximal",
+          "lux_hysteresis_pct": "Marge lumière naturelle (%)",
+          "lux_hysteresis_time": "Délai lumière naturelle (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Compte à rebours avant extinction. Il démarre à la fin de la présence (occupation inactive, ou mouvement inactif sans capteur d'occupation), redémarre à chaque mouvement et s'annule au retour de l'occupation. À l'échéance, le préavis commence. Multiplié par le facteur adaptatif dans les zones de passage.",
+          "failsafe_timeout": "Filet de sécurité : sans mouvement pendant ce temps, tout est éteint, relais compris (protège contre un capteur d'occupation bloqué). Redémarre à chaque mouvement. Ignoré en forçage permanent.",
+          "perm_override_timeout": "Durée maximale du forçage permanent (double clic). À l'échéance, la lumière s'éteint et le mode automatique reprend.",
+          "temp_override_timeout": "En forçage temporaire (clic simple), chaque clic inverse la lumière et relance cette minuterie. À l'échéance, le mode automatique reprend : allumée si la pièce est occupée et sombre, sinon éteinte. 0 = n'expire jamais seul.",
+          "warning_dim_pct": "Avant l'extinction, les ampoules baissent à ce pourcentage de la luminosité actuelle pour avertir les personnes encore présentes. Tout mouvement ou occupation annule le préavis et rétablit la luminosité. Effectif uniquement avec des ampoules connectées.",
+          "warning_dim_duration": "Durée pendant laquelle la lumière reste baissée avant de s'éteindre.",
+          "adaptive_window": "Fenêtre glissante dans laquelle les allumages automatiques sont comptés pour détecter une zone de passage.",
+          "adaptive_threshold": "Nombre d'allumages dans la fenêtre au-delà duquel le délai d'occupation commence à s'allonger.",
+          "adaptive_multiplier": "Chaque allumage au-delà du seuil multiplie le délai d'occupation par ce facteur (facteur = multiplicateur ^ allumages en excès). Exemple : 1,5 avec 2 allumages en excès → ×2,25.",
+          "adaptive_max_factor": "Limite supérieure de l'allongement (ex. 4,0 → au plus 4× le délai d'occupation). À chaque échéance normale du délai, la part en excès du facteur est divisée par deux.",
+          "lux_hysteresis_pct": "Extinction par lumière naturelle : lumière allumée en profil normal, si la luminosité dépasse seuil × (1 + marge/100), la lumière s'éteint même si la pièce est occupée (ex. volets ouverts).",
+          "lux_hysteresis_time": "Secondes pendant lesquelles la mesure doit rester au-dessus de la marge avant l'extinction, pour ignorer les pics brefs."
         }
       },
       "profiles": {
         "title": "Profils de luminosité",
-        "description": "Mettre à jour les profils.",
+        "description": "Luminosité utilisée à l'allumage automatique : profil normal, ou profil doux (ex. la nuit) choisi par plage horaire ou par une entité.",
         "data": {
           "brightness_normal": "Luminosité normale",
-          "brightness_soft": "Luminosité tamisée",
-          "profile_mode": "Déclencheur du profil tamisé",
-          "soft_time_start": "Début plage tamisée",
-          "soft_time_end": "Fin plage tamisée",
-          "soft_entity": "Entité profil tamisé"
+          "brightness_soft": "Luminosité douce",
+          "profile_mode": "Activation du profil doux",
+          "soft_time_start": "Début du profil doux",
+          "soft_time_end": "Fin du profil doux",
+          "soft_entity": "Entité du profil doux"
+        },
+        "data_description": {
+          "brightness_normal": "Luminosité (1–255) du profil normal. 255 = 100 %.",
+          "brightness_soft": "Luminosité (1–255) utilisée quand le profil doux est actif, ex. la nuit. 100 ≈ 40 %.",
+          "profile_mode": "Comment le profil doux est choisi : « Plage horaire » utilise le début et la fin ci-dessous ; « Entité » suit l'entité du profil doux.",
+          "soft_time_start": "Mode plage horaire uniquement. Heure de début du profil doux. Les plages passant minuit sont acceptées (ex. 20:00–08:00).",
+          "soft_time_end": "Mode plage horaire uniquement. Heure de fin du profil doux.",
+          "soft_entity": "Mode entité uniquement. Binary_sensor ou input_boolean : quand il est actif, le profil doux est actif (ex. une entrée « mode nuit »)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "Au moins un actionneur (ampoule ou relais) est requis."
+      "at_least_one_actuator": "Au moins un actionneur est requis : ampoules connectées ou relais."
+    }
+  },
+  "selector": {
+    "profile_mode": {
+      "options": {
+        "time": "Plage horaire",
+        "entity": "Entité"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "occupancy_timer": {
+        "name": "Minuterie d'occupation"
+      },
+      "failsafe_timer": {
+        "name": "Minuterie de sécurité"
+      },
+      "override_timer": {
+        "name": "Minuterie de forçage"
+      },
+      "warning_timer": {
+        "name": "Minuterie de préavis"
+      },
+      "profile": {
+        "name": "Profil"
+      },
+      "state": {
+        "name": "État"
+      },
+      "adaptive_factor": {
+        "name": "Facteur adaptatif"
+      },
+      "activation_count": {
+        "name": "Nombre d'allumages"
+      },
+      "lux": {
+        "name": "Lux"
+      }
+    },
+    "number": {
+      "occupancy_timeout": {
+        "name": "Délai d'occupation"
+      },
+      "failsafe_timeout": {
+        "name": "Délai de sécurité"
+      },
+      "perm_override_timeout": {
+        "name": "Délai forçage permanent"
+      },
+      "temp_override_timeout": {
+        "name": "Délai forçage temporaire"
+      },
+      "warning_dim_pct": {
+        "name": "Préavis luminosité"
+      },
+      "warning_dim_duration": {
+        "name": "Préavis durée"
+      },
+      "lux_threshold": {
+        "name": "Seuil lux"
+      },
+      "adaptive_window": {
+        "name": "Fenêtre adaptative"
+      },
+      "adaptive_threshold": {
+        "name": "Seuil adaptatif"
+      },
+      "adaptive_multiplier": {
+        "name": "Multiplicateur adaptatif"
+      },
+      "adaptive_max_factor": {
+        "name": "Facteur adaptatif maximal"
+      },
+      "lux_hysteresis_pct": {
+        "name": "Marge lumière naturelle"
+      },
+      "lux_hysteresis_time": {
+        "name": "Délai lumière naturelle"
+      }
+    },
+    "button": {
+      "set_lux_threshold": {
+        "name": "Définir le seuil lux"
+      }
     }
   }
 }

@@ -2,133 +2,296 @@
   "config": {
     "step": {
       "user": {
-        "title": "Area Selection",
-        "description": "Select the Home Assistant area to configure.",
+        "title": "Area",
+        "description": "Choose the Home Assistant area this controller manages. The next steps only list entities assigned to this area.",
         "data": {
           "area_id": "Area"
+        },
+        "data_description": {
+          "area_id": "Home Assistant area managed by this controller. Its name becomes the device name; entity pickers in the next steps are filtered by it."
         }
       },
       "sensors": {
         "title": "Sensors",
-        "description": "Select sensors for this area.",
+        "description": "Presence and ambient-light sensors that drive the automation. Motion, occupancy and illuminance sensors are required.",
         "data": {
           "motion_sensors": "Motion sensors",
           "occupancy_sensor": "Occupancy sensor",
-          "lux_sensor": "Lux sensor",
-          "lux_threshold": "Lux threshold"
+          "lux_sensor": "Illuminance sensor",
+          "lux_threshold": "Lux threshold (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "One or more binary_sensors (e.g. PIR). Any sensor turning on (OR logic) switches the light on, if ambient light is below the lux threshold. Every motion also restarts the occupancy countdown and the failsafe timer, and cancels the pre-off warning.",
+          "occupancy_sensor": "Binary_sensor for static presence (e.g. mmWave). While on, the switch-off countdown is held; when it turns off, the occupancy timeout starts. It also decides whether the area is still occupied when a temporary override expires.",
+          "lux_sensor": "Sensor reporting ambient light in lux. The light switches on only while the reading is below the lux threshold. If unavailable or not numeric, the area is treated as dark.",
+          "lux_threshold": "Ambient light level below which motion switches the light on. If the light is on, the reading reaches this value and the occupancy sensor is off, the light switches off. Tip: the 'Set lux threshold' button stores the current reading."
         }
       },
       "actuators": {
         "title": "Actuators",
-        "description": "Configure light and relay entities. At least one is required.",
+        "description": "Entities switched by the controller, plus optional override and suspend inputs. At least one between smart bulbs and relay is required.",
         "data": {
-          "bulb_entity": "Smart bulbs (optional)",
-          "relay_entity": "Relay switch (optional)",
-          "soft_bulb_entity": "Soft profile bulbs (optional)",
-          "soft_relay_entity": "Soft profile relay (optional)",
-          "suspend_entity": "Suspend entity (optional)",
-          "physical_interaction_sensor": "Physical interaction sensor (optional)"
+          "bulb_entity": "Smart bulbs",
+          "relay_entity": "Relay",
+          "physical_interaction_sensor": "Physical interaction sensor",
+          "soft_bulb_entity": "Soft profile bulbs",
+          "soft_relay_entity": "Soft profile relay",
+          "suspend_entity": "Suspend entity"
+        },
+        "data_description": {
+          "bulb_entity": "Optional. One or more light entities, all switched on with the brightness of the active profile. If a relay is also set, at switch-off only the bulbs are turned off and the relay stays on, so the bulbs stay reachable.",
+          "relay_entity": "Optional switch powering the circuit. Without bulbs it is switched on/off directly. With bulbs it is switched on with them and left on at switch-off; only the failsafe turns it off.",
+          "physical_interaction_sensor": "Optional binary_sensor from the whodidit integration. When its click window closes (on → off), the click_count attribute is read: 1 click = temporary override, 2 clicks = enter/exit permanent override, 3 or more = ignored.",
+          "soft_bulb_entity": "Optional. Light entities used instead of the smart bulbs while the soft profile is active (e.g. a night lamp). If neither soft bulbs nor soft relay are set, the normal actuators are used.",
+          "soft_relay_entity": "Optional. Switch used instead of the relay while the soft profile is active. Same rules as the main relay.",
+          "suspend_entity": "Optional binary_sensor or input_boolean. While on, the automation is paused: timers are cancelled, the light is left as it is and all events are ignored (e.g. movie mode). When it turns off, motion and lux are re-evaluated."
         }
       },
       "timings": {
         "title": "Timings",
-        "description": "Configure timeouts and warning settings.",
+        "description": "Switch-off timers, pre-off warning, adaptive timeout and natural-light auto-off. Every value can also be changed later from the device's number entities, without reconfiguring.",
         "data": {
-          "occupancy_timeout": "Occupancy timeout — seconds after last motion before dimming warning starts",
-          "failsafe_timeout": "Failsafe timeout — seconds without any motion before forced OFF (resets on every motion)",
-          "adaptive_window": "Adaptive window — rolling time window (s) for counting activations",
-          "adaptive_threshold": "Adaptive threshold — activations in window before extending timeout",
-          "adaptive_multiplier": "Adaptive multiplier — factor per activation over threshold (e.g. 1.5 = 50% longer)",
-          "adaptive_max_factor": "Adaptive max factor — max timeout extension cap (e.g. 4.0 = 4× longer at most)",
-          "perm_override_timeout": "Permanent override timeout — auto-exit after N seconds (0 = never expires)",
-          "lux_hysteresis_pct": "Lux hysteresis % — lux must exceed threshold by this % to trigger natural-light auto-off",
-          "lux_hysteresis_time": "Lux hysteresis time — seconds lux must stay high before auto-off",
-          "temp_override_timeout": "Temp override timeout — return to auto after N seconds of inactivity (0 = never, stays until next click)",
-          "warning_dim_pct": "Warning dim % — brightness during pre-off dim (e.g. 30 = dim to 30%)",
-          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)"
+          "occupancy_timeout": "Occupancy timeout (s)",
+          "failsafe_timeout": "Failsafe timeout (s)",
+          "perm_override_timeout": "Permanent override timeout (s)",
+          "temp_override_timeout": "Temporary override timeout (s)",
+          "warning_dim_pct": "Warning dim (%)",
+          "warning_dim_duration": "Warning dim duration (s)",
+          "adaptive_window": "Adaptive window (s)",
+          "adaptive_threshold": "Adaptive threshold",
+          "adaptive_multiplier": "Adaptive multiplier",
+          "adaptive_max_factor": "Adaptive max factor",
+          "lux_hysteresis_pct": "Natural light margin (%)",
+          "lux_hysteresis_time": "Natural light delay (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Countdown before switch-off. It starts when presence ends (occupancy sensor off, or motion off if no occupancy sensor), restarts at every motion and is cancelled when occupancy returns. When it expires the warning dim starts. Multiplied by the adaptive factor in busy areas.",
+          "failsafe_timeout": "Safety net: with no motion for this time everything is forced off, relay included (protects against an occupancy sensor stuck on). Restarts at every motion. Ignored during permanent override.",
+          "perm_override_timeout": "Maximum duration of the permanent override (double click). When it expires the light switches off and automatic mode resumes.",
+          "temp_override_timeout": "In temporary override (single click) every click toggles the light and restarts this timer. When it expires automatic mode resumes: light on if the area is occupied and dark, otherwise off. 0 = never expires by itself.",
+          "warning_dim_pct": "Before switching off, the bulbs are dimmed to this percentage of the current brightness to warn whoever is still in the room. Any motion or occupancy cancels the warning and restores brightness. Effective only with smart bulbs.",
+          "warning_dim_duration": "How long the light stays dimmed before switching off.",
+          "adaptive_window": "Rolling time window in which automatic activations are counted to detect a high-traffic area.",
+          "adaptive_threshold": "Number of activations within the window above which the occupancy timeout starts to be extended.",
+          "adaptive_multiplier": "Each activation beyond the threshold multiplies the occupancy timeout by this factor (factor = multiplier ^ extra activations). Example: 1.5 with 2 extra activations → ×2.25.",
+          "adaptive_max_factor": "Upper limit of the extension (e.g. 4.0 → at most 4× the occupancy timeout). Each time the timeout expires normally, the extra part of the factor is halved.",
+          "lux_hysteresis_pct": "Natural-light auto-off: with the light on in the normal profile, if ambient light exceeds threshold × (1 + margin/100) the light switches off even if the area is occupied (e.g. shutters opened).",
+          "lux_hysteresis_time": "Seconds the reading must stay above the margin before the natural-light auto-off, to ignore short peaks."
         }
       },
       "profiles": {
-        "title": "Brightness Profiles",
-        "description": "Configure normal and soft brightness profiles.",
+        "title": "Brightness profiles",
+        "description": "Brightness used when the light switches on automatically: normal profile, or soft profile (e.g. at night) selected by time range or by an entity.",
         "data": {
           "brightness_normal": "Normal brightness",
           "brightness_soft": "Soft brightness",
-          "profile_mode": "Soft profile trigger",
-          "soft_time_start": "Soft time start",
-          "soft_time_end": "Soft time end",
+          "profile_mode": "Soft profile activation",
+          "soft_time_start": "Soft profile start",
+          "soft_time_end": "Soft profile end",
           "soft_entity": "Soft profile entity"
+        },
+        "data_description": {
+          "brightness_normal": "Brightness (1–255) used by the normal profile. 255 = 100%.",
+          "brightness_soft": "Brightness (1–255) used while the soft profile is active, e.g. at night. 100 ≈ 40%.",
+          "profile_mode": "How the soft profile is chosen: 'Time range' uses start and end time below; 'Entity' follows the soft profile entity.",
+          "soft_time_start": "Time range mode only. Time the soft profile starts. Ranges across midnight are supported (e.g. 20:00–08:00).",
+          "soft_time_end": "Time range mode only. Time the soft profile ends.",
+          "soft_entity": "Entity mode only. binary_sensor or input_boolean: while on, the soft profile is active (e.g. a 'night mode' helper)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "At least one actuator (bulb or relay) is required."
+      "at_least_one_actuator": "At least one actuator is required: smart bulbs or relay."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Area Selection",
-        "description": "Change the configured area.",
+        "title": "Area",
+        "description": "Choose the Home Assistant area this controller manages. The next steps only list entities assigned to this area. Saving reloads the integration and restarts all timers.",
         "data": {
           "area_id": "Area"
+        },
+        "data_description": {
+          "area_id": "Home Assistant area managed by this controller. Its name becomes the device name; entity pickers in the next steps are filtered by it."
         }
       },
       "sensors": {
         "title": "Sensors",
-        "description": "Update sensors for this area.",
+        "description": "Presence and ambient-light sensors that drive the automation. Motion, occupancy and illuminance sensors are required.",
         "data": {
           "motion_sensors": "Motion sensors",
           "occupancy_sensor": "Occupancy sensor",
-          "lux_sensor": "Lux sensor",
-          "lux_threshold": "Lux threshold"
+          "lux_sensor": "Illuminance sensor",
+          "lux_threshold": "Lux threshold (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "One or more binary_sensors (e.g. PIR). Any sensor turning on (OR logic) switches the light on, if ambient light is below the lux threshold. Every motion also restarts the occupancy countdown and the failsafe timer, and cancels the pre-off warning.",
+          "occupancy_sensor": "Binary_sensor for static presence (e.g. mmWave). While on, the switch-off countdown is held; when it turns off, the occupancy timeout starts. It also decides whether the area is still occupied when a temporary override expires.",
+          "lux_sensor": "Sensor reporting ambient light in lux. The light switches on only while the reading is below the lux threshold. If unavailable or not numeric, the area is treated as dark.",
+          "lux_threshold": "Ambient light level below which motion switches the light on. If the light is on, the reading reaches this value and the occupancy sensor is off, the light switches off. Tip: the 'Set lux threshold' button stores the current reading."
         }
       },
       "actuators": {
         "title": "Actuators",
-        "description": "Update light and relay entities.",
+        "description": "Entities switched by the controller, plus optional override and suspend inputs. At least one between smart bulbs and relay is required.",
         "data": {
-          "bulb_entity": "Smart bulbs (optional)",
-          "relay_entity": "Relay switch (optional)",
-          "soft_bulb_entity": "Soft profile bulbs (optional)",
-          "soft_relay_entity": "Soft profile relay (optional)",
-          "suspend_entity": "Suspend entity (optional)",
-          "physical_interaction_sensor": "Physical interaction sensor (optional)"
+          "bulb_entity": "Smart bulbs",
+          "relay_entity": "Relay",
+          "physical_interaction_sensor": "Physical interaction sensor",
+          "soft_bulb_entity": "Soft profile bulbs",
+          "soft_relay_entity": "Soft profile relay",
+          "suspend_entity": "Suspend entity"
+        },
+        "data_description": {
+          "bulb_entity": "Optional. One or more light entities, all switched on with the brightness of the active profile. If a relay is also set, at switch-off only the bulbs are turned off and the relay stays on, so the bulbs stay reachable.",
+          "relay_entity": "Optional switch powering the circuit. Without bulbs it is switched on/off directly. With bulbs it is switched on with them and left on at switch-off; only the failsafe turns it off.",
+          "physical_interaction_sensor": "Optional binary_sensor from the whodidit integration. When its click window closes (on → off), the click_count attribute is read: 1 click = temporary override, 2 clicks = enter/exit permanent override, 3 or more = ignored.",
+          "soft_bulb_entity": "Optional. Light entities used instead of the smart bulbs while the soft profile is active (e.g. a night lamp). If neither soft bulbs nor soft relay are set, the normal actuators are used.",
+          "soft_relay_entity": "Optional. Switch used instead of the relay while the soft profile is active. Same rules as the main relay.",
+          "suspend_entity": "Optional binary_sensor or input_boolean. While on, the automation is paused: timers are cancelled, the light is left as it is and all events are ignored (e.g. movie mode). When it turns off, motion and lux are re-evaluated."
         }
       },
       "timings": {
         "title": "Timings",
-        "description": "Update timeouts and warning settings.",
+        "description": "Switch-off timers, pre-off warning, adaptive timeout and natural-light auto-off. Every value can also be changed later from the device's number entities, without reconfiguring.",
         "data": {
-          "occupancy_timeout": "Occupancy timeout — seconds after last motion before dimming warning starts",
-          "failsafe_timeout": "Failsafe timeout — seconds without any motion before forced OFF (resets on every motion)",
-          "adaptive_window": "Adaptive window — rolling time window (s) for counting activations",
-          "adaptive_threshold": "Adaptive threshold — activations in window before extending timeout",
-          "adaptive_multiplier": "Adaptive multiplier — factor per activation over threshold (e.g. 1.5 = 50% longer)",
-          "adaptive_max_factor": "Adaptive max factor — max timeout extension cap (e.g. 4.0 = 4× longer at most)",
-          "perm_override_timeout": "Permanent override timeout — auto-exit after N seconds (0 = never expires)",
-          "lux_hysteresis_pct": "Lux hysteresis % — lux must exceed threshold by this % to trigger natural-light auto-off",
-          "lux_hysteresis_time": "Lux hysteresis time — seconds lux must stay high before auto-off",
-          "temp_override_timeout": "Temp override timeout — return to auto after N seconds of inactivity (0 = never, stays until next click)",
-          "warning_dim_pct": "Warning dim % — brightness during pre-off dim (e.g. 30 = dim to 30%)",
-          "warning_dim_duration": "Warning dim duration — seconds to stay dimmed before turning off (0 = turn off immediately)"
+          "occupancy_timeout": "Occupancy timeout (s)",
+          "failsafe_timeout": "Failsafe timeout (s)",
+          "perm_override_timeout": "Permanent override timeout (s)",
+          "temp_override_timeout": "Temporary override timeout (s)",
+          "warning_dim_pct": "Warning dim (%)",
+          "warning_dim_duration": "Warning dim duration (s)",
+          "adaptive_window": "Adaptive window (s)",
+          "adaptive_threshold": "Adaptive threshold",
+          "adaptive_multiplier": "Adaptive multiplier",
+          "adaptive_max_factor": "Adaptive max factor",
+          "lux_hysteresis_pct": "Natural light margin (%)",
+          "lux_hysteresis_time": "Natural light delay (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Countdown before switch-off. It starts when presence ends (occupancy sensor off, or motion off if no occupancy sensor), restarts at every motion and is cancelled when occupancy returns. When it expires the warning dim starts. Multiplied by the adaptive factor in busy areas.",
+          "failsafe_timeout": "Safety net: with no motion for this time everything is forced off, relay included (protects against an occupancy sensor stuck on). Restarts at every motion. Ignored during permanent override.",
+          "perm_override_timeout": "Maximum duration of the permanent override (double click). When it expires the light switches off and automatic mode resumes.",
+          "temp_override_timeout": "In temporary override (single click) every click toggles the light and restarts this timer. When it expires automatic mode resumes: light on if the area is occupied and dark, otherwise off. 0 = never expires by itself.",
+          "warning_dim_pct": "Before switching off, the bulbs are dimmed to this percentage of the current brightness to warn whoever is still in the room. Any motion or occupancy cancels the warning and restores brightness. Effective only with smart bulbs.",
+          "warning_dim_duration": "How long the light stays dimmed before switching off.",
+          "adaptive_window": "Rolling time window in which automatic activations are counted to detect a high-traffic area.",
+          "adaptive_threshold": "Number of activations within the window above which the occupancy timeout starts to be extended.",
+          "adaptive_multiplier": "Each activation beyond the threshold multiplies the occupancy timeout by this factor (factor = multiplier ^ extra activations). Example: 1.5 with 2 extra activations → ×2.25.",
+          "adaptive_max_factor": "Upper limit of the extension (e.g. 4.0 → at most 4× the occupancy timeout). Each time the timeout expires normally, the extra part of the factor is halved.",
+          "lux_hysteresis_pct": "Natural-light auto-off: with the light on in the normal profile, if ambient light exceeds threshold × (1 + margin/100) the light switches off even if the area is occupied (e.g. shutters opened).",
+          "lux_hysteresis_time": "Seconds the reading must stay above the margin before the natural-light auto-off, to ignore short peaks."
         }
       },
       "profiles": {
-        "title": "Brightness Profiles",
-        "description": "Update brightness profiles.",
+        "title": "Brightness profiles",
+        "description": "Brightness used when the light switches on automatically: normal profile, or soft profile (e.g. at night) selected by time range or by an entity.",
         "data": {
           "brightness_normal": "Normal brightness",
           "brightness_soft": "Soft brightness",
-          "profile_mode": "Soft profile trigger",
-          "soft_time_start": "Soft time start",
-          "soft_time_end": "Soft time end",
+          "profile_mode": "Soft profile activation",
+          "soft_time_start": "Soft profile start",
+          "soft_time_end": "Soft profile end",
           "soft_entity": "Soft profile entity"
+        },
+        "data_description": {
+          "brightness_normal": "Brightness (1–255) used by the normal profile. 255 = 100%.",
+          "brightness_soft": "Brightness (1–255) used while the soft profile is active, e.g. at night. 100 ≈ 40%.",
+          "profile_mode": "How the soft profile is chosen: 'Time range' uses start and end time below; 'Entity' follows the soft profile entity.",
+          "soft_time_start": "Time range mode only. Time the soft profile starts. Ranges across midnight are supported (e.g. 20:00–08:00).",
+          "soft_time_end": "Time range mode only. Time the soft profile ends.",
+          "soft_entity": "Entity mode only. binary_sensor or input_boolean: while on, the soft profile is active (e.g. a 'night mode' helper)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "At least one actuator (bulb or relay) is required."
+      "at_least_one_actuator": "At least one actuator is required: smart bulbs or relay."
+    }
+  },
+  "selector": {
+    "profile_mode": {
+      "options": {
+        "time": "Time range",
+        "entity": "Entity"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "occupancy_timer": {
+        "name": "Occupancy Timer"
+      },
+      "failsafe_timer": {
+        "name": "Failsafe Timer"
+      },
+      "override_timer": {
+        "name": "Override Timer"
+      },
+      "warning_timer": {
+        "name": "Warning Timer"
+      },
+      "profile": {
+        "name": "Profile"
+      },
+      "state": {
+        "name": "State"
+      },
+      "adaptive_factor": {
+        "name": "Adaptive Factor"
+      },
+      "activation_count": {
+        "name": "Activation Count"
+      },
+      "lux": {
+        "name": "Lux"
+      }
+    },
+    "number": {
+      "occupancy_timeout": {
+        "name": "Occupancy Timeout"
+      },
+      "failsafe_timeout": {
+        "name": "Failsafe Timeout"
+      },
+      "perm_override_timeout": {
+        "name": "Perm Override Timeout"
+      },
+      "temp_override_timeout": {
+        "name": "Temp Override Timeout"
+      },
+      "warning_dim_pct": {
+        "name": "Warning Dim Pct"
+      },
+      "warning_dim_duration": {
+        "name": "Warning Dim Duration"
+      },
+      "lux_threshold": {
+        "name": "Lux Threshold"
+      },
+      "adaptive_window": {
+        "name": "Adaptive Window"
+      },
+      "adaptive_threshold": {
+        "name": "Adaptive Threshold"
+      },
+      "adaptive_multiplier": {
+        "name": "Adaptive Multiplier"
+      },
+      "adaptive_max_factor": {
+        "name": "Adaptive Max Factor"
+      },
+      "lux_hysteresis_pct": {
+        "name": "Lux Hysteresis Pct"
+      },
+      "lux_hysteresis_time": {
+        "name": "Lux Hysteresis Time"
+      }
+    },
+    "button": {
+      "set_lux_threshold": {
+        "name": "Set Lux Threshold"
+      }
     }
   }
 }

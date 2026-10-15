@@ -2,133 +2,296 @@
   "config": {
     "step": {
       "user": {
-        "title": "Selezione area",
-        "description": "Seleziona l'area Home Assistant da configurare.",
+        "title": "Area",
+        "description": "Scegli l'area di Home Assistant gestita da questo controller. I passi successivi mostrano solo le entità assegnate a quest'area.",
         "data": {
           "area_id": "Area"
+        },
+        "data_description": {
+          "area_id": "Area di Home Assistant gestita da questo controller. Il suo nome diventa il nome del dispositivo; i selettori dei passi successivi sono filtrati su di essa."
         }
       },
       "sensors": {
         "title": "Sensori",
-        "description": "Seleziona i sensori per questa area.",
+        "description": "Sensori di presenza e di luce ambiente che guidano l'automazione. Sensori di movimento, occupazione e luminosità sono obbligatori.",
         "data": {
           "motion_sensors": "Sensori di movimento",
-          "occupancy_sensor": "Sensore di presenza",
+          "occupancy_sensor": "Sensore di occupazione",
           "lux_sensor": "Sensore di luminosità",
-          "lux_threshold": "Soglia luminosità"
+          "lux_threshold": "Soglia lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Uno o più binary_sensor (es. PIR). Basta che uno si attivi (logica OR) per accendere la luce, se la luce ambiente è sotto la soglia lux. Ogni movimento riavvia anche il conto alla rovescia di occupazione e il timer di sicurezza, e annulla il preavviso di spegnimento.",
+          "occupancy_sensor": "Binary_sensor di presenza statica (es. mmWave). Finché è attivo il conto alla rovescia di spegnimento è sospeso; quando si disattiva parte il timeout di occupazione. Decide anche se l'area è ancora occupata alla scadenza di un override temporaneo.",
+          "lux_sensor": "Sensore della luce ambiente in lux. La luce si accende solo se la lettura è sotto la soglia lux. Se non disponibile o non numerico, l'area è considerata buia.",
+          "lux_threshold": "Livello di luce ambiente sotto il quale il movimento accende la luce. Se la luce è accesa, la lettura raggiunge questo valore e il sensore di occupazione è spento, la luce si spegne. Suggerimento: il pulsante 'Imposta soglia lux' memorizza la lettura attuale."
         }
       },
       "actuators": {
         "title": "Attuatori",
-        "description": "Configura le entità luce e relè. Almeno uno è obbligatorio.",
+        "description": "Entità comandate dal controller, più gli ingressi opzionali di override e sospensione. È obbligatorio almeno uno tra lampadine smart e relè.",
         "data": {
-          "bulb_entity": "Lampadine smart (opzionale)",
-          "relay_entity": "Relè (opzionale)",
-          "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
-          "soft_relay_entity": "Relè profilo soffuso (opzionale)",
-          "suspend_entity": "Entità sospensione (opzionale)",
-          "physical_interaction_sensor": "Sensore interazione fisica (opzionale)"
+          "bulb_entity": "Lampadine smart",
+          "relay_entity": "Relè",
+          "physical_interaction_sensor": "Sensore interazione fisica",
+          "soft_bulb_entity": "Lampadine profilo soft",
+          "soft_relay_entity": "Relè profilo soft",
+          "suspend_entity": "Entità di sospensione"
+        },
+        "data_description": {
+          "bulb_entity": "Opzionale. Una o più entità light, accese tutte con la luminosità del profilo attivo. Se è impostato anche un relè, allo spegnimento si spengono solo le lampadine e il relè resta acceso, così restano raggiungibili.",
+          "relay_entity": "Switch opzionale che alimenta il circuito. Senza lampadine viene acceso/spento direttamente. Con le lampadine viene acceso insieme a loro e lasciato acceso allo spegnimento; lo spegne solo il timer di sicurezza.",
+          "physical_interaction_sensor": "Binary_sensor opzionale dell'integrazione whodidit. Alla chiusura della finestra dei click (on → off) viene letto l'attributo click_count: 1 click = override temporaneo, 2 click = entra/esce dall'override permanente, 3 o più = ignorati.",
+          "soft_bulb_entity": "Opzionale. Entità light usate al posto delle lampadine smart quando il profilo soft è attivo (es. una lampada notturna). Se non sono impostati né lampadine né relè soft, si usano gli attuatori normali.",
+          "soft_relay_entity": "Opzionale. Switch usato al posto del relè quando il profilo soft è attivo. Stesse regole del relè principale.",
+          "suspend_entity": "Binary_sensor o input_boolean opzionale. Quando è attiva l'automazione è in pausa: timer annullati, luce lasciata com'è e tutti gli eventi ignorati (es. modalità film). Quando si disattiva, movimento e lux vengono rivalutati."
         }
       },
       "timings": {
-        "title": "Temporizzazioni",
-        "description": "Configura timeout e impostazioni avviso.",
+        "title": "Tempi",
+        "description": "Timer di spegnimento, preavviso, timeout adattivo e spegnimento per luce naturale. Ogni valore è modificabile anche in seguito dalle entità numero del dispositivo, senza riconfigurare.",
         "data": {
-          "occupancy_timeout": "Timeout presenza — secondi dall'ultimo movimento prima dell'avviso attenuazione",
-          "failsafe_timeout": "Timeout sicurezza — secondi senza movimento prima dello spegnimento forzato (si resetta ad ogni movimento)",
-          "adaptive_window": "Finestra adattiva — finestra mobile (s) per contare le attivazioni",
-          "adaptive_threshold": "Soglia adattiva — attivazioni nella finestra prima di estendere il timeout",
-          "adaptive_multiplier": "Moltiplicatore adattivo — fattore per attivazione extra (es. 1.5 = 50% in più)",
-          "adaptive_max_factor": "Fattore max adattivo — cap massimo dell'estensione (es. 4.0 = massimo 4×)",
-          "perm_override_timeout": "Timeout override permanente — uscita automatica dopo N secondi (0 = non scade mai)",
-          "lux_hysteresis_pct": "Isteresi lux % — la lux deve superare la soglia di questa % per attivare lo spegnimento automatico",
-          "lux_hysteresis_time": "Tempo isteresi lux — secondi che la lux deve restare alta prima dello spegnimento",
-          "temp_override_timeout": "Timeout override temporaneo — ritorno automatico dopo N secondi di inattività (0 = mai, resta fino al prossimo click)",
-          "warning_dim_pct": "Attenuazione avviso % — luminosità durante l'attenuazione pre-spegnimento (es. 30 = 30%)",
-          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)"
+          "occupancy_timeout": "Timeout occupazione (s)",
+          "failsafe_timeout": "Timeout di sicurezza (s)",
+          "perm_override_timeout": "Timeout override permanente (s)",
+          "temp_override_timeout": "Timeout override temporaneo (s)",
+          "warning_dim_pct": "Preavviso: luminosità (%)",
+          "warning_dim_duration": "Preavviso: durata (s)",
+          "adaptive_window": "Finestra adattiva (s)",
+          "adaptive_threshold": "Soglia adattiva",
+          "adaptive_multiplier": "Moltiplicatore adattivo",
+          "adaptive_max_factor": "Fattore adattivo massimo",
+          "lux_hysteresis_pct": "Margine luce naturale (%)",
+          "lux_hysteresis_time": "Ritardo luce naturale (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Conto alla rovescia prima dello spegnimento. Parte quando la presenza termina (sensore di occupazione spento, o movimento spento se manca il sensore di occupazione), riparte a ogni movimento e si annulla quando l'occupazione ritorna. Alla scadenza inizia il preavviso. Moltiplicato dal fattore adattivo nelle aree di passaggio.",
+          "failsafe_timeout": "Rete di sicurezza: senza movimento per questo tempo si spegne tutto, relè compreso (protegge da un sensore di occupazione bloccato su attivo). Riparte a ogni movimento. Ignorato durante l'override permanente.",
+          "perm_override_timeout": "Durata massima dell'override permanente (doppio click). Alla scadenza la luce si spegne e riprende la modalità automatica.",
+          "temp_override_timeout": "In override temporaneo (click singolo) ogni click inverte la luce e riavvia questo timer. Alla scadenza riprende la modalità automatica: luce accesa se l'area è occupata e buia, altrimenti spenta. 0 = non scade mai da solo.",
+          "warning_dim_pct": "Prima dello spegnimento le lampadine scendono a questa percentuale della luminosità attuale, per avvisare chi è ancora nella stanza. Qualsiasi movimento o occupazione annulla il preavviso e ripristina la luminosità. Efficace solo con lampadine smart.",
+          "warning_dim_duration": "Per quanto tempo la luce resta abbassata prima di spegnersi.",
+          "adaptive_window": "Finestra temporale mobile in cui si contano le accensioni automatiche per riconoscere un'area di passaggio.",
+          "adaptive_threshold": "Numero di accensioni nella finestra oltre il quale il timeout di occupazione inizia ad allungarsi.",
+          "adaptive_multiplier": "Ogni accensione oltre la soglia moltiplica il timeout di occupazione per questo fattore (fattore = moltiplicatore ^ accensioni in eccesso). Esempio: 1,5 con 2 accensioni in eccesso → ×2,25.",
+          "adaptive_max_factor": "Limite superiore dell'allungamento (es. 4,0 → al massimo 4× il timeout di occupazione). Ogni volta che il timeout scade normalmente, la parte in eccesso del fattore si dimezza.",
+          "lux_hysteresis_pct": "Spegnimento per luce naturale: con la luce accesa nel profilo normale, se la luce ambiente supera soglia × (1 + margine/100) la luce si spegne anche se l'area è occupata (es. tapparelle aperte).",
+          "lux_hysteresis_time": "Secondi in cui la lettura deve restare sopra il margine prima dello spegnimento per luce naturale, per ignorare picchi brevi."
         }
       },
       "profiles": {
-        "title": "Profili luminosità",
-        "description": "Configura i profili di luminosità normale e soffusa.",
+        "title": "Profili di luminosità",
+        "description": "Luminosità usata all'accensione automatica: profilo normale, oppure profilo soft (es. di notte) scelto per fascia oraria o da un'entità.",
         "data": {
           "brightness_normal": "Luminosità normale",
-          "brightness_soft": "Luminosità soffusa",
-          "profile_mode": "Attivazione profilo soffuso",
-          "soft_time_start": "Inizio fascia soffusa",
-          "soft_time_end": "Fine fascia soffusa",
-          "soft_entity": "Entità profilo soffuso"
+          "brightness_soft": "Luminosità soft",
+          "profile_mode": "Attivazione profilo soft",
+          "soft_time_start": "Inizio profilo soft",
+          "soft_time_end": "Fine profilo soft",
+          "soft_entity": "Entità profilo soft"
+        },
+        "data_description": {
+          "brightness_normal": "Luminosità (1–255) del profilo normale. 255 = 100%.",
+          "brightness_soft": "Luminosità (1–255) usata quando il profilo soft è attivo, es. di notte. 100 ≈ 40%.",
+          "profile_mode": "Come si sceglie il profilo soft: 'Fascia oraria' usa inizio e fine qui sotto; 'Entità' segue l'entità del profilo soft.",
+          "soft_time_start": "Solo in modalità fascia oraria. Ora di inizio del profilo soft. Sono ammesse fasce a cavallo della mezzanotte (es. 20:00–08:00).",
+          "soft_time_end": "Solo in modalità fascia oraria. Ora di fine del profilo soft.",
+          "soft_entity": "Solo in modalità entità. Binary_sensor o input_boolean: quando è attivo, il profilo soft è attivo (es. un helper 'modalità notte')."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "È necessario almeno un attuatore (lampadina o relè)."
+      "at_least_one_actuator": "Serve almeno un attuatore: lampadine smart o relè."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Selezione area",
-        "description": "Cambia l'area configurata.",
+        "title": "Area",
+        "description": "Scegli l'area di Home Assistant gestita da questo controller. I passi successivi mostrano solo le entità assegnate a quest'area. Il salvataggio ricarica l'integrazione e riavvia tutti i timer.",
         "data": {
           "area_id": "Area"
+        },
+        "data_description": {
+          "area_id": "Area di Home Assistant gestita da questo controller. Il suo nome diventa il nome del dispositivo; i selettori dei passi successivi sono filtrati su di essa."
         }
       },
       "sensors": {
         "title": "Sensori",
-        "description": "Aggiorna i sensori per questa area.",
+        "description": "Sensori di presenza e di luce ambiente che guidano l'automazione. Sensori di movimento, occupazione e luminosità sono obbligatori.",
         "data": {
           "motion_sensors": "Sensori di movimento",
-          "occupancy_sensor": "Sensore di presenza",
+          "occupancy_sensor": "Sensore di occupazione",
           "lux_sensor": "Sensore di luminosità",
-          "lux_threshold": "Soglia luminosità"
+          "lux_threshold": "Soglia lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Uno o più binary_sensor (es. PIR). Basta che uno si attivi (logica OR) per accendere la luce, se la luce ambiente è sotto la soglia lux. Ogni movimento riavvia anche il conto alla rovescia di occupazione e il timer di sicurezza, e annulla il preavviso di spegnimento.",
+          "occupancy_sensor": "Binary_sensor di presenza statica (es. mmWave). Finché è attivo il conto alla rovescia di spegnimento è sospeso; quando si disattiva parte il timeout di occupazione. Decide anche se l'area è ancora occupata alla scadenza di un override temporaneo.",
+          "lux_sensor": "Sensore della luce ambiente in lux. La luce si accende solo se la lettura è sotto la soglia lux. Se non disponibile o non numerico, l'area è considerata buia.",
+          "lux_threshold": "Livello di luce ambiente sotto il quale il movimento accende la luce. Se la luce è accesa, la lettura raggiunge questo valore e il sensore di occupazione è spento, la luce si spegne. Suggerimento: il pulsante 'Imposta soglia lux' memorizza la lettura attuale."
         }
       },
       "actuators": {
         "title": "Attuatori",
-        "description": "Aggiorna le entità luce e relè.",
+        "description": "Entità comandate dal controller, più gli ingressi opzionali di override e sospensione. È obbligatorio almeno uno tra lampadine smart e relè.",
         "data": {
-          "bulb_entity": "Lampadine smart (opzionale)",
-          "relay_entity": "Relè (opzionale)",
-          "soft_bulb_entity": "Lampadine profilo soffuso (opzionale)",
-          "soft_relay_entity": "Relè profilo soffuso (opzionale)",
-          "suspend_entity": "Entità sospensione (opzionale)",
-          "physical_interaction_sensor": "Sensore interazione fisica (opzionale)"
+          "bulb_entity": "Lampadine smart",
+          "relay_entity": "Relè",
+          "physical_interaction_sensor": "Sensore interazione fisica",
+          "soft_bulb_entity": "Lampadine profilo soft",
+          "soft_relay_entity": "Relè profilo soft",
+          "suspend_entity": "Entità di sospensione"
+        },
+        "data_description": {
+          "bulb_entity": "Opzionale. Una o più entità light, accese tutte con la luminosità del profilo attivo. Se è impostato anche un relè, allo spegnimento si spengono solo le lampadine e il relè resta acceso, così restano raggiungibili.",
+          "relay_entity": "Switch opzionale che alimenta il circuito. Senza lampadine viene acceso/spento direttamente. Con le lampadine viene acceso insieme a loro e lasciato acceso allo spegnimento; lo spegne solo il timer di sicurezza.",
+          "physical_interaction_sensor": "Binary_sensor opzionale dell'integrazione whodidit. Alla chiusura della finestra dei click (on → off) viene letto l'attributo click_count: 1 click = override temporaneo, 2 click = entra/esce dall'override permanente, 3 o più = ignorati.",
+          "soft_bulb_entity": "Opzionale. Entità light usate al posto delle lampadine smart quando il profilo soft è attivo (es. una lampada notturna). Se non sono impostati né lampadine né relè soft, si usano gli attuatori normali.",
+          "soft_relay_entity": "Opzionale. Switch usato al posto del relè quando il profilo soft è attivo. Stesse regole del relè principale.",
+          "suspend_entity": "Binary_sensor o input_boolean opzionale. Quando è attiva l'automazione è in pausa: timer annullati, luce lasciata com'è e tutti gli eventi ignorati (es. modalità film). Quando si disattiva, movimento e lux vengono rivalutati."
         }
       },
       "timings": {
-        "title": "Temporizzazioni",
-        "description": "Aggiorna timeout e impostazioni avviso.",
+        "title": "Tempi",
+        "description": "Timer di spegnimento, preavviso, timeout adattivo e spegnimento per luce naturale. Ogni valore è modificabile anche in seguito dalle entità numero del dispositivo, senza riconfigurare.",
         "data": {
-          "occupancy_timeout": "Timeout presenza — secondi dall'ultimo movimento prima dell'avviso attenuazione",
-          "failsafe_timeout": "Timeout sicurezza — secondi senza movimento prima dello spegnimento forzato (si resetta ad ogni movimento)",
-          "adaptive_window": "Finestra adattiva — finestra mobile (s) per contare le attivazioni",
-          "adaptive_threshold": "Soglia adattiva — attivazioni nella finestra prima di estendere il timeout",
-          "adaptive_multiplier": "Moltiplicatore adattivo — fattore per attivazione extra (es. 1.5 = 50% in più)",
-          "adaptive_max_factor": "Fattore max adattivo — cap massimo dell'estensione (es. 4.0 = massimo 4×)",
-          "perm_override_timeout": "Timeout override permanente — uscita automatica dopo N secondi (0 = non scade mai)",
-          "lux_hysteresis_pct": "Isteresi lux % — la lux deve superare la soglia di questa % per attivare lo spegnimento automatico",
-          "lux_hysteresis_time": "Tempo isteresi lux — secondi che la lux deve restare alta prima dello spegnimento",
-          "temp_override_timeout": "Timeout override temporaneo — ritorno automatico dopo N secondi di inattività (0 = mai, resta fino al prossimo click)",
-          "warning_dim_pct": "Attenuazione avviso % — luminosità durante l'attenuazione pre-spegnimento (es. 30 = 30%)",
-          "warning_dim_duration": "Durata attenuazione — secondi di attenuazione prima dello spegnimento (0 = spegnimento immediato)"
+          "occupancy_timeout": "Timeout occupazione (s)",
+          "failsafe_timeout": "Timeout di sicurezza (s)",
+          "perm_override_timeout": "Timeout override permanente (s)",
+          "temp_override_timeout": "Timeout override temporaneo (s)",
+          "warning_dim_pct": "Preavviso: luminosità (%)",
+          "warning_dim_duration": "Preavviso: durata (s)",
+          "adaptive_window": "Finestra adattiva (s)",
+          "adaptive_threshold": "Soglia adattiva",
+          "adaptive_multiplier": "Moltiplicatore adattivo",
+          "adaptive_max_factor": "Fattore adattivo massimo",
+          "lux_hysteresis_pct": "Margine luce naturale (%)",
+          "lux_hysteresis_time": "Ritardo luce naturale (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Conto alla rovescia prima dello spegnimento. Parte quando la presenza termina (sensore di occupazione spento, o movimento spento se manca il sensore di occupazione), riparte a ogni movimento e si annulla quando l'occupazione ritorna. Alla scadenza inizia il preavviso. Moltiplicato dal fattore adattivo nelle aree di passaggio.",
+          "failsafe_timeout": "Rete di sicurezza: senza movimento per questo tempo si spegne tutto, relè compreso (protegge da un sensore di occupazione bloccato su attivo). Riparte a ogni movimento. Ignorato durante l'override permanente.",
+          "perm_override_timeout": "Durata massima dell'override permanente (doppio click). Alla scadenza la luce si spegne e riprende la modalità automatica.",
+          "temp_override_timeout": "In override temporaneo (click singolo) ogni click inverte la luce e riavvia questo timer. Alla scadenza riprende la modalità automatica: luce accesa se l'area è occupata e buia, altrimenti spenta. 0 = non scade mai da solo.",
+          "warning_dim_pct": "Prima dello spegnimento le lampadine scendono a questa percentuale della luminosità attuale, per avvisare chi è ancora nella stanza. Qualsiasi movimento o occupazione annulla il preavviso e ripristina la luminosità. Efficace solo con lampadine smart.",
+          "warning_dim_duration": "Per quanto tempo la luce resta abbassata prima di spegnersi.",
+          "adaptive_window": "Finestra temporale mobile in cui si contano le accensioni automatiche per riconoscere un'area di passaggio.",
+          "adaptive_threshold": "Numero di accensioni nella finestra oltre il quale il timeout di occupazione inizia ad allungarsi.",
+          "adaptive_multiplier": "Ogni accensione oltre la soglia moltiplica il timeout di occupazione per questo fattore (fattore = moltiplicatore ^ accensioni in eccesso). Esempio: 1,5 con 2 accensioni in eccesso → ×2,25.",
+          "adaptive_max_factor": "Limite superiore dell'allungamento (es. 4,0 → al massimo 4× il timeout di occupazione). Ogni volta che il timeout scade normalmente, la parte in eccesso del fattore si dimezza.",
+          "lux_hysteresis_pct": "Spegnimento per luce naturale: con la luce accesa nel profilo normale, se la luce ambiente supera soglia × (1 + margine/100) la luce si spegne anche se l'area è occupata (es. tapparelle aperte).",
+          "lux_hysteresis_time": "Secondi in cui la lettura deve restare sopra il margine prima dello spegnimento per luce naturale, per ignorare picchi brevi."
         }
       },
       "profiles": {
-        "title": "Profili luminosità",
-        "description": "Aggiorna i profili di luminosità.",
+        "title": "Profili di luminosità",
+        "description": "Luminosità usata all'accensione automatica: profilo normale, oppure profilo soft (es. di notte) scelto per fascia oraria o da un'entità.",
         "data": {
           "brightness_normal": "Luminosità normale",
-          "brightness_soft": "Luminosità soffusa",
-          "profile_mode": "Attivazione profilo soffuso",
-          "soft_time_start": "Inizio fascia soffusa",
-          "soft_time_end": "Fine fascia soffusa",
-          "soft_entity": "Entità profilo soffuso"
+          "brightness_soft": "Luminosità soft",
+          "profile_mode": "Attivazione profilo soft",
+          "soft_time_start": "Inizio profilo soft",
+          "soft_time_end": "Fine profilo soft",
+          "soft_entity": "Entità profilo soft"
+        },
+        "data_description": {
+          "brightness_normal": "Luminosità (1–255) del profilo normale. 255 = 100%.",
+          "brightness_soft": "Luminosità (1–255) usata quando il profilo soft è attivo, es. di notte. 100 ≈ 40%.",
+          "profile_mode": "Come si sceglie il profilo soft: 'Fascia oraria' usa inizio e fine qui sotto; 'Entità' segue l'entità del profilo soft.",
+          "soft_time_start": "Solo in modalità fascia oraria. Ora di inizio del profilo soft. Sono ammesse fasce a cavallo della mezzanotte (es. 20:00–08:00).",
+          "soft_time_end": "Solo in modalità fascia oraria. Ora di fine del profilo soft.",
+          "soft_entity": "Solo in modalità entità. Binary_sensor o input_boolean: quando è attivo, il profilo soft è attivo (es. un helper 'modalità notte')."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "È necessario almeno un attuatore (lampadina o relè)."
+      "at_least_one_actuator": "Serve almeno un attuatore: lampadine smart o relè."
+    }
+  },
+  "selector": {
+    "profile_mode": {
+      "options": {
+        "time": "Fascia oraria",
+        "entity": "Entità"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "occupancy_timer": {
+        "name": "Timer occupazione"
+      },
+      "failsafe_timer": {
+        "name": "Timer di sicurezza"
+      },
+      "override_timer": {
+        "name": "Timer override"
+      },
+      "warning_timer": {
+        "name": "Timer preavviso"
+      },
+      "profile": {
+        "name": "Profilo"
+      },
+      "state": {
+        "name": "Stato"
+      },
+      "adaptive_factor": {
+        "name": "Fattore adattivo"
+      },
+      "activation_count": {
+        "name": "Conteggio accensioni"
+      },
+      "lux": {
+        "name": "Lux"
+      }
+    },
+    "number": {
+      "occupancy_timeout": {
+        "name": "Timeout occupazione"
+      },
+      "failsafe_timeout": {
+        "name": "Timeout di sicurezza"
+      },
+      "perm_override_timeout": {
+        "name": "Timeout override permanente"
+      },
+      "temp_override_timeout": {
+        "name": "Timeout override temporaneo"
+      },
+      "warning_dim_pct": {
+        "name": "Preavviso luminosità"
+      },
+      "warning_dim_duration": {
+        "name": "Preavviso durata"
+      },
+      "lux_threshold": {
+        "name": "Soglia lux"
+      },
+      "adaptive_window": {
+        "name": "Finestra adattiva"
+      },
+      "adaptive_threshold": {
+        "name": "Soglia adattiva"
+      },
+      "adaptive_multiplier": {
+        "name": "Moltiplicatore adattivo"
+      },
+      "adaptive_max_factor": {
+        "name": "Fattore adattivo massimo"
+      },
+      "lux_hysteresis_pct": {
+        "name": "Margine luce naturale"
+      },
+      "lux_hysteresis_time": {
+        "name": "Ritardo luce naturale"
+      }
+    },
+    "button": {
+      "set_lux_threshold": {
+        "name": "Imposta soglia lux"
+      }
     }
   }
 }

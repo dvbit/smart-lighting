@@ -45,32 +45,32 @@ async def async_setup_entry(
     entities = [
         # Timer sensors
         SmartLightingTimerSensor(
-            coordinator, entry, area_name, "occupancy_timer",
-            "Occupancy Timer", "occupancy_timer_remaining",
+            coordinator, entry, area_name,
+            "occupancy_timer", "occupancy_timer_remaining",
         ),
         SmartLightingTimerSensor(
-            coordinator, entry, area_name, "failsafe_timer",
-            "Failsafe Timer", "failsafe_timer_remaining",
+            coordinator, entry, area_name,
+            "failsafe_timer", "failsafe_timer_remaining",
         ),
         SmartLightingTimerSensor(
-            coordinator, entry, area_name, "override_timer",
-            "Override Timer", "active_override_timer_remaining",
+            coordinator, entry, area_name,
+            "override_timer", "active_override_timer_remaining",
         ),
         SmartLightingTimerSensor(
-            coordinator, entry, area_name, "warning_timer",
-            "Warning Timer", "warning_timer_remaining",
+            coordinator, entry, area_name,
+            "warning_timer", "warning_timer_remaining",
         ),
         # Status sensors
         SmartLightingProfileSensor(coordinator, entry, area_name),
         SmartLightingStateSensor(coordinator, entry, area_name),
         # Adaptive timeout sensors
         SmartLightingAdaptiveSensor(
-            coordinator, entry, area_name, "adaptive_factor",
-            "Adaptive Factor", "adaptive_factor",
+            coordinator, entry, area_name,
+            "adaptive_factor", "adaptive_factor",
         ),
         SmartLightingAdaptiveSensor(
-            coordinator, entry, area_name, "activation_count",
-            "Activation Count", "activation_count",
+            coordinator, entry, area_name,
+            "activation_count", "activation_count",
         ),
         # Lux mirror sensor [Spec §9]
         SmartLightingLuxSensor(coordinator, entry, area_name),
@@ -99,7 +99,6 @@ class SmartLightingTimerSensor(SensorEntity):
         entry: ConfigEntry,
         area_name: str,
         key: str,
-        name: str,
         prop_name: str,
     ) -> None:
         """Initialize timer sensor.
@@ -109,7 +108,6 @@ class SmartLightingTimerSensor(SensorEntity):
             entry: Config entry.
             area_name: Area display name.
             key: Unique key suffix for entity_id.
-            name: Human-readable sensor name.
             prop_name: Coordinator property name returning remaining seconds.
         """
         self._coordinator = coordinator
@@ -118,7 +116,8 @@ class SmartLightingTimerSensor(SensorEntity):
         self._unsub_interval = None
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
-        self._attr_name = name
+        # Display name from translations: entity.sensor.<key> [Spec §13]
+        self._attr_translation_key = key
         self._attr_device_info = coordinator.device_info
 
     @property
@@ -170,7 +169,8 @@ class SmartLightingProfileSensor(SensorEntity):
         """Initialize profile sensor."""
         self._coordinator = coordinator
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_profile"
-        self._attr_name = "Profile"
+        # Display name from translations [Spec §13]
+        self._attr_translation_key = "profile"
         self._attr_device_info = coordinator.device_info
 
     @property
@@ -204,7 +204,8 @@ class SmartLightingStateSensor(SensorEntity):
         """Initialize state sensor."""
         self._coordinator = coordinator
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_state"
-        self._attr_name = "State"
+        # Display name from translations [Spec §13]
+        self._attr_translation_key = "state"
         self._attr_device_info = coordinator.device_info
 
     @property
@@ -240,7 +241,6 @@ class SmartLightingAdaptiveSensor(SensorEntity):
         entry: ConfigEntry,
         area_name: str,
         key: str,
-        name: str,
         prop_name: str,
     ) -> None:
         """Initialize adaptive sensor."""
@@ -249,7 +249,8 @@ class SmartLightingAdaptiveSensor(SensorEntity):
         self._unsub_interval = None
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
-        self._attr_name = name
+        # Display name from translations: entity.sensor.<key> [Spec §13]
+        self._attr_translation_key = key
         self._attr_device_info = coordinator.device_info
 
     @property
@@ -307,7 +308,8 @@ class SmartLightingLuxSensor(SensorEntity):
         self._unsub_track = None
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_lux"
-        self._attr_name = "Lux"
+        # Display name from translations [Spec §13]
+        self._attr_translation_key = "lux"
         self._attr_device_info = coordinator.device_info
 
     @property

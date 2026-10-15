@@ -1,9 +1,10 @@
-# Smart Lighting Automation -- Specification (v3.7)
+# Smart Lighting Automation -- Specification (v4.5)
 
 ## 1. Scope
 
 Area-based smart lighting automation for Home Assistant.
-Zero external dependencies. All features embedded.
+Zero Python dependencies. Physical click detection is delegated to the
+`dvbit/whodidit` integration (optional).
 
 ## 2. Area Model
 
@@ -20,8 +21,7 @@ Actuators:
 - Soft profile relay (optional, single)
 
 Override detection:
-- Monitored switch (optional) — entity monitored for physical click detection
-- Click time window (default 1.5s) — window for counting clicks
+- Physical interaction sensor (optional) — whodidit binary_sensor
 
 Suspend:
 - Suspend entity (optional) — binary_sensor/input_boolean to pause automation
@@ -93,28 +93,19 @@ Profiles: normal / soft
 - Default: 10% above threshold, 5 seconds hysteresis
 - Excluded from: override states, soft profile
 
-## 10. Manual Override (Embedded Click Detection)
+## 10. Manual Override (whodidit)
 
-Detection:
-- Monitors a configured switch/light entity (monitored_switch)
-- Analyzes event context.user_id:
-  - None → Physical (wall switch press)
-  - user_id + parent_id → Automation → ignored
-  - user_id without parent_id → UI → ignored
-- Only Physical interactions counted for override
-
-Click counting:
-- Accumulates clicks within click_time_window (default 1.5s)
-- After window expires: 1 click = temp override, 2 = perm override, 3+ = ignored
-
-Exposed sensors:
-- click_count, interaction_type, acting_user, click_time_window
+Detection (delegated to `dvbit/whodidit`):
+- physical_interaction_sensor = whodidit binary_sensor, ON during the click window
+- On the ON → OFF transition the `click_count` attribute is read
+- 1 click = temp override, 2 = perm override toggle, 3+ = ignored
 
 ## 11. Override Behavior
 
 Temporary override (1 click):
 - Toggles light state, freezes in temp_override
-- Exit: another single click OR temp_override_timeout (0=never, default)
+- Every further single click toggles again and restarts temp_override_timeout
+- Exit: only temp_override_timeout (0 = never expires by itself, default)
 - On exit: re-evaluate motion+lux conditions
 - Occupancy and motion ignored during temp_override
 
@@ -142,8 +133,8 @@ Permanent override (2 clicks):
 
 Entities per area:
 - 1 light (main controller)
-- 14+ sensors (timers, state, profile, adaptive, click detection, lux)
-- 13+ numbers (all runtime-adjustable parameters)
+- 9 sensors (4 timers, state, profile, adaptive factor, activation count, lux)
+- 13 numbers (all runtime-adjustable parameters)
 - 1 button (set lux threshold from sensor)
 
 ## 14. Persistence
@@ -159,13 +150,9 @@ Entities per area:
 - OFF: re-evaluate motion+lux → activate or deactivate
 - Use case: external scene automation (movie mode)
 
-## 16. No-Motion Fallback
+## 16. No-Motion Fallback (removed in v4.3.0)
 
-- If state=active and occupancy ON but no motion for no_motion_timeout → warning dim → OFF
-- Protects against stuck occupancy sensors or static heat sources
-- Resets on every motion detection
-- Ignored during override states
-- Default: 1800s (30 min), 0=disabled
+- Removed: the failsafe timeout (§8) covers stuck occupancy sensors.
 
 ## 17. Adaptive Timeout
 
@@ -186,3 +173,14 @@ Entities per area:
 - Click icons → more-info popup of source entity
 - Settings popup with all runtime parameters + set lux threshold button
 - Localized: EN, IT, FR, ES, DE
+
+## 19. Localization and parameter documentation (v4.5)
+
+- Config flow, options flow, selector options and entity names translated in
+  EN, IT, FR, ES, DE (`translations/*.json`, `strings.json` = EN).
+- Every config field has a short label (`data`) and a detailed explanation
+  (`data_description`): purpose, effect, unit, special values.
+- Entity names use `translation_key`. English names must slugify to the key,
+  because HA generates entity_ids from English names and the card looks
+  entities up by `smart_lighting_<area>_<key>`.
+- README EN and IT contain a full parameter reference (default, range, meaning).

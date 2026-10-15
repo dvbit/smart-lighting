@@ -1,0 +1,297 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Bereich",
+        "description": "Wähle den Home-Assistant-Bereich, den dieser Controller steuert. Die nächsten Schritte zeigen nur Entitäten dieses Bereichs.",
+        "data": {
+          "area_id": "Bereich"
+        },
+        "data_description": {
+          "area_id": "Von diesem Controller gesteuerter Home-Assistant-Bereich. Sein Name wird zum Gerätenamen; die Auswahllisten der nächsten Schritte werden danach gefiltert."
+        }
+      },
+      "sensors": {
+        "title": "Sensoren",
+        "description": "Anwesenheits- und Umgebungslichtsensoren, die die Automatisierung steuern. Bewegungs-, Belegungs- und Helligkeitssensor sind erforderlich.",
+        "data": {
+          "motion_sensors": "Bewegungsmelder",
+          "occupancy_sensor": "Belegungssensor",
+          "lux_sensor": "Helligkeitssensor",
+          "lux_threshold": "Lux-Schwelle (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Ein oder mehrere binary_sensor (z. B. PIR). Es genügt, dass einer auslöst (ODER-Logik), um das Licht einzuschalten, sofern das Umgebungslicht unter der Lux-Schwelle liegt. Jede Bewegung startet außerdem den Belegungs-Countdown und den Sicherheits-Timer neu und bricht die Vorwarnung ab.",
+          "occupancy_sensor": "Binary_sensor für statische Anwesenheit (z. B. mmWave). Solange er aktiv ist, ruht der Ausschalt-Countdown; wird er inaktiv, startet die Belegungszeit. Er entscheidet auch, ob der Bereich beim Ablauf einer temporären Übersteuerung noch belegt ist.",
+          "lux_sensor": "Sensor für das Umgebungslicht in Lux. Das Licht schaltet nur ein, wenn der Messwert unter der Lux-Schwelle liegt. Ist er nicht verfügbar oder nicht numerisch, gilt der Bereich als dunkel.",
+          "lux_threshold": "Umgebungslicht, unterhalb dessen Bewegung das Licht einschaltet. Ist das Licht an, erreicht der Messwert diesen Wert und ist der Belegungssensor inaktiv, schaltet das Licht aus. Tipp: Die Schaltfläche „Lux-Schwelle setzen“ übernimmt den aktuellen Messwert."
+        }
+      },
+      "actuators": {
+        "title": "Aktoren",
+        "description": "Vom Controller geschaltete Entitäten sowie optionale Eingänge für Übersteuerung und Pause. Mindestens smarte Lampen oder ein Relais ist erforderlich.",
+        "data": {
+          "bulb_entity": "Smarte Lampen",
+          "relay_entity": "Relais",
+          "physical_interaction_sensor": "Sensor für physische Bedienung",
+          "soft_bulb_entity": "Lampen Sanftprofil",
+          "soft_relay_entity": "Relais Sanftprofil",
+          "suspend_entity": "Pause-Entität"
+        },
+        "data_description": {
+          "bulb_entity": "Optional. Eine oder mehrere light-Entitäten, alle mit der Helligkeit des aktiven Profils eingeschaltet. Ist zusätzlich ein Relais gesetzt, werden beim Ausschalten nur die Lampen ausgeschaltet und das Relais bleibt an, damit sie erreichbar bleiben.",
+          "relay_entity": "Optionaler Schalter, der den Stromkreis versorgt. Ohne Lampen wird er direkt ein-/ausgeschaltet. Mit Lampen wird er mit ihnen eingeschaltet und beim Ausschalten angelassen; nur die Sicherheitsabschaltung schaltet ihn aus.",
+          "physical_interaction_sensor": "Optionaler binary_sensor der Integration whodidit. Schließt sich das Klickfenster (on → off), wird das Attribut click_count gelesen: 1 Klick = temporäre Übersteuerung, 2 Klicks = permanente Übersteuerung ein/aus, 3 oder mehr = ignoriert.",
+          "soft_bulb_entity": "Optional. light-Entitäten, die bei aktivem Sanftprofil statt der smarten Lampen verwendet werden (z. B. eine Nachtlampe). Sind weder Sanft-Lampen noch Sanft-Relais gesetzt, werden die normalen Aktoren verwendet.",
+          "soft_relay_entity": "Optional. Schalter, der bei aktivem Sanftprofil statt des Relais verwendet wird. Gleiche Regeln wie beim Hauptrelais.",
+          "suspend_entity": "Optionaler binary_sensor oder input_boolean. Solange aktiv, ist die Automatisierung pausiert: Timer werden abgebrochen, das Licht bleibt wie es ist und alle Ereignisse werden ignoriert (z. B. Kinomodus). Beim Deaktivieren werden Bewegung und Lux neu bewertet."
+        }
+      },
+      "timings": {
+        "title": "Zeiten",
+        "description": "Ausschalt-Timer, Vorwarnung, adaptive Verlängerung und Abschaltung bei Tageslicht. Jeder Wert lässt sich später auch über die Zahl-Entitäten des Geräts ändern, ohne Neukonfiguration.",
+        "data": {
+          "occupancy_timeout": "Belegungszeit (s)",
+          "failsafe_timeout": "Sicherheitszeit (s)",
+          "perm_override_timeout": "Dauer permanente Übersteuerung (s)",
+          "temp_override_timeout": "Dauer temporäre Übersteuerung (s)",
+          "warning_dim_pct": "Vorwarnung: Helligkeit (%)",
+          "warning_dim_duration": "Vorwarnung: Dauer (s)",
+          "adaptive_window": "Adaptives Fenster (s)",
+          "adaptive_threshold": "Adaptive Schwelle",
+          "adaptive_multiplier": "Adaptiver Multiplikator",
+          "adaptive_max_factor": "Maximaler adaptiver Faktor",
+          "lux_hysteresis_pct": "Tageslicht-Spanne (%)",
+          "lux_hysteresis_time": "Tageslicht-Verzögerung (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Countdown bis zum Ausschalten. Er startet, wenn die Anwesenheit endet (Belegungssensor inaktiv, oder Bewegung inaktiv ohne Belegungssensor), startet bei jeder Bewegung neu und wird abgebrochen, wenn die Belegung zurückkehrt. Danach beginnt die Vorwarnung. Wird in Durchgangsbereichen mit dem adaptiven Faktor multipliziert.",
+          "failsafe_timeout": "Sicherheitsnetz: Ohne Bewegung für diese Zeit wird alles ausgeschaltet, inklusive Relais (schützt vor einem hängenden Belegungssensor). Startet bei jeder Bewegung neu. Wird bei permanenter Übersteuerung ignoriert.",
+          "perm_override_timeout": "Maximale Dauer der permanenten Übersteuerung (Doppelklick). Danach schaltet das Licht aus und der Automatikbetrieb wird fortgesetzt.",
+          "temp_override_timeout": "In der temporären Übersteuerung (Einzelklick) schaltet jeder Klick das Licht um und startet diesen Timer neu. Danach wird der Automatikbetrieb fortgesetzt: Licht an, wenn der Bereich belegt und dunkel ist, sonst aus. 0 = läuft nie von selbst ab.",
+          "warning_dim_pct": "Vor dem Ausschalten werden die Lampen auf diesen Prozentsatz der aktuellen Helligkeit gedimmt, um Anwesende zu warnen. Jede Bewegung oder Belegung bricht die Vorwarnung ab und stellt die Helligkeit wieder her. Nur mit smarten Lampen wirksam.",
+          "warning_dim_duration": "Wie lange das Licht gedimmt bleibt, bevor es ausschaltet.",
+          "adaptive_window": "Gleitendes Zeitfenster, in dem automatische Einschaltungen gezählt werden, um einen Durchgangsbereich zu erkennen.",
+          "adaptive_threshold": "Anzahl der Einschaltungen im Fenster, ab der die Belegungszeit verlängert wird.",
+          "adaptive_multiplier": "Jede Einschaltung über der Schwelle multipliziert die Belegungszeit mit diesem Faktor (Faktor = Multiplikator ^ überzählige Einschaltungen). Beispiel: 1,5 bei 2 überzähligen Einschaltungen → ×2,25.",
+          "adaptive_max_factor": "Obergrenze der Verlängerung (z. B. 4,0 → höchstens 4× die Belegungszeit). Bei jedem normalen Ablauf der Belegungszeit wird der überzählige Anteil des Faktors halbiert.",
+          "lux_hysteresis_pct": "Abschaltung bei Tageslicht: Ist das Licht im Normalprofil an und übersteigt das Umgebungslicht Schwelle × (1 + Spanne/100), schaltet es aus, auch wenn der Bereich belegt ist (z. B. Rollläden geöffnet).",
+          "lux_hysteresis_time": "Sekunden, die der Messwert über der Spanne bleiben muss, bevor wegen Tageslicht abgeschaltet wird, um kurze Spitzen zu ignorieren."
+        }
+      },
+      "profiles": {
+        "title": "Helligkeitsprofile",
+        "description": "Helligkeit beim automatischen Einschalten: Normalprofil oder Sanftprofil (z. B. nachts), gewählt nach Zeitraum oder über eine Entität.",
+        "data": {
+          "brightness_normal": "Normale Helligkeit",
+          "brightness_soft": "Sanfte Helligkeit",
+          "profile_mode": "Aktivierung Sanftprofil",
+          "soft_time_start": "Beginn Sanftprofil",
+          "soft_time_end": "Ende Sanftprofil",
+          "soft_entity": "Sanftprofil-Entität"
+        },
+        "data_description": {
+          "brightness_normal": "Helligkeit (1–255) des Normalprofils. 255 = 100 %.",
+          "brightness_soft": "Helligkeit (1–255) bei aktivem Sanftprofil, z. B. nachts. 100 ≈ 40 %.",
+          "profile_mode": "Wie das Sanftprofil gewählt wird: „Zeitraum“ nutzt Beginn und Ende unten; „Entität“ folgt der Sanftprofil-Entität.",
+          "soft_time_start": "Nur im Modus Zeitraum. Uhrzeit, zu der das Sanftprofil beginnt. Zeiträume über Mitternacht sind möglich (z. B. 20:00–08:00).",
+          "soft_time_end": "Nur im Modus Zeitraum. Uhrzeit, zu der das Sanftprofil endet.",
+          "soft_entity": "Nur im Modus Entität. binary_sensor oder input_boolean: Solange aktiv, ist das Sanftprofil aktiv (z. B. ein Helfer „Nachtmodus“)."
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Mindestens ein Aktor ist erforderlich: smarte Lampen oder Relais."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Bereich",
+        "description": "Wähle den Home-Assistant-Bereich, den dieser Controller steuert. Die nächsten Schritte zeigen nur Entitäten dieses Bereichs. Beim Speichern wird die Integration neu geladen und alle Timer neu gestartet.",
+        "data": {
+          "area_id": "Bereich"
+        },
+        "data_description": {
+          "area_id": "Von diesem Controller gesteuerter Home-Assistant-Bereich. Sein Name wird zum Gerätenamen; die Auswahllisten der nächsten Schritte werden danach gefiltert."
+        }
+      },
+      "sensors": {
+        "title": "Sensoren",
+        "description": "Anwesenheits- und Umgebungslichtsensoren, die die Automatisierung steuern. Bewegungs-, Belegungs- und Helligkeitssensor sind erforderlich.",
+        "data": {
+          "motion_sensors": "Bewegungsmelder",
+          "occupancy_sensor": "Belegungssensor",
+          "lux_sensor": "Helligkeitssensor",
+          "lux_threshold": "Lux-Schwelle (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Ein oder mehrere binary_sensor (z. B. PIR). Es genügt, dass einer auslöst (ODER-Logik), um das Licht einzuschalten, sofern das Umgebungslicht unter der Lux-Schwelle liegt. Jede Bewegung startet außerdem den Belegungs-Countdown und den Sicherheits-Timer neu und bricht die Vorwarnung ab.",
+          "occupancy_sensor": "Binary_sensor für statische Anwesenheit (z. B. mmWave). Solange er aktiv ist, ruht der Ausschalt-Countdown; wird er inaktiv, startet die Belegungszeit. Er entscheidet auch, ob der Bereich beim Ablauf einer temporären Übersteuerung noch belegt ist.",
+          "lux_sensor": "Sensor für das Umgebungslicht in Lux. Das Licht schaltet nur ein, wenn der Messwert unter der Lux-Schwelle liegt. Ist er nicht verfügbar oder nicht numerisch, gilt der Bereich als dunkel.",
+          "lux_threshold": "Umgebungslicht, unterhalb dessen Bewegung das Licht einschaltet. Ist das Licht an, erreicht der Messwert diesen Wert und ist der Belegungssensor inaktiv, schaltet das Licht aus. Tipp: Die Schaltfläche „Lux-Schwelle setzen“ übernimmt den aktuellen Messwert."
+        }
+      },
+      "actuators": {
+        "title": "Aktoren",
+        "description": "Vom Controller geschaltete Entitäten sowie optionale Eingänge für Übersteuerung und Pause. Mindestens smarte Lampen oder ein Relais ist erforderlich.",
+        "data": {
+          "bulb_entity": "Smarte Lampen",
+          "relay_entity": "Relais",
+          "physical_interaction_sensor": "Sensor für physische Bedienung",
+          "soft_bulb_entity": "Lampen Sanftprofil",
+          "soft_relay_entity": "Relais Sanftprofil",
+          "suspend_entity": "Pause-Entität"
+        },
+        "data_description": {
+          "bulb_entity": "Optional. Eine oder mehrere light-Entitäten, alle mit der Helligkeit des aktiven Profils eingeschaltet. Ist zusätzlich ein Relais gesetzt, werden beim Ausschalten nur die Lampen ausgeschaltet und das Relais bleibt an, damit sie erreichbar bleiben.",
+          "relay_entity": "Optionaler Schalter, der den Stromkreis versorgt. Ohne Lampen wird er direkt ein-/ausgeschaltet. Mit Lampen wird er mit ihnen eingeschaltet und beim Ausschalten angelassen; nur die Sicherheitsabschaltung schaltet ihn aus.",
+          "physical_interaction_sensor": "Optionaler binary_sensor der Integration whodidit. Schließt sich das Klickfenster (on → off), wird das Attribut click_count gelesen: 1 Klick = temporäre Übersteuerung, 2 Klicks = permanente Übersteuerung ein/aus, 3 oder mehr = ignoriert.",
+          "soft_bulb_entity": "Optional. light-Entitäten, die bei aktivem Sanftprofil statt der smarten Lampen verwendet werden (z. B. eine Nachtlampe). Sind weder Sanft-Lampen noch Sanft-Relais gesetzt, werden die normalen Aktoren verwendet.",
+          "soft_relay_entity": "Optional. Schalter, der bei aktivem Sanftprofil statt des Relais verwendet wird. Gleiche Regeln wie beim Hauptrelais.",
+          "suspend_entity": "Optionaler binary_sensor oder input_boolean. Solange aktiv, ist die Automatisierung pausiert: Timer werden abgebrochen, das Licht bleibt wie es ist und alle Ereignisse werden ignoriert (z. B. Kinomodus). Beim Deaktivieren werden Bewegung und Lux neu bewertet."
+        }
+      },
+      "timings": {
+        "title": "Zeiten",
+        "description": "Ausschalt-Timer, Vorwarnung, adaptive Verlängerung und Abschaltung bei Tageslicht. Jeder Wert lässt sich später auch über die Zahl-Entitäten des Geräts ändern, ohne Neukonfiguration.",
+        "data": {
+          "occupancy_timeout": "Belegungszeit (s)",
+          "failsafe_timeout": "Sicherheitszeit (s)",
+          "perm_override_timeout": "Dauer permanente Übersteuerung (s)",
+          "temp_override_timeout": "Dauer temporäre Übersteuerung (s)",
+          "warning_dim_pct": "Vorwarnung: Helligkeit (%)",
+          "warning_dim_duration": "Vorwarnung: Dauer (s)",
+          "adaptive_window": "Adaptives Fenster (s)",
+          "adaptive_threshold": "Adaptive Schwelle",
+          "adaptive_multiplier": "Adaptiver Multiplikator",
+          "adaptive_max_factor": "Maximaler adaptiver Faktor",
+          "lux_hysteresis_pct": "Tageslicht-Spanne (%)",
+          "lux_hysteresis_time": "Tageslicht-Verzögerung (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Countdown bis zum Ausschalten. Er startet, wenn die Anwesenheit endet (Belegungssensor inaktiv, oder Bewegung inaktiv ohne Belegungssensor), startet bei jeder Bewegung neu und wird abgebrochen, wenn die Belegung zurückkehrt. Danach beginnt die Vorwarnung. Wird in Durchgangsbereichen mit dem adaptiven Faktor multipliziert.",
+          "failsafe_timeout": "Sicherheitsnetz: Ohne Bewegung für diese Zeit wird alles ausgeschaltet, inklusive Relais (schützt vor einem hängenden Belegungssensor). Startet bei jeder Bewegung neu. Wird bei permanenter Übersteuerung ignoriert.",
+          "perm_override_timeout": "Maximale Dauer der permanenten Übersteuerung (Doppelklick). Danach schaltet das Licht aus und der Automatikbetrieb wird fortgesetzt.",
+          "temp_override_timeout": "In der temporären Übersteuerung (Einzelklick) schaltet jeder Klick das Licht um und startet diesen Timer neu. Danach wird der Automatikbetrieb fortgesetzt: Licht an, wenn der Bereich belegt und dunkel ist, sonst aus. 0 = läuft nie von selbst ab.",
+          "warning_dim_pct": "Vor dem Ausschalten werden die Lampen auf diesen Prozentsatz der aktuellen Helligkeit gedimmt, um Anwesende zu warnen. Jede Bewegung oder Belegung bricht die Vorwarnung ab und stellt die Helligkeit wieder her. Nur mit smarten Lampen wirksam.",
+          "warning_dim_duration": "Wie lange das Licht gedimmt bleibt, bevor es ausschaltet.",
+          "adaptive_window": "Gleitendes Zeitfenster, in dem automatische Einschaltungen gezählt werden, um einen Durchgangsbereich zu erkennen.",
+          "adaptive_threshold": "Anzahl der Einschaltungen im Fenster, ab der die Belegungszeit verlängert wird.",
+          "adaptive_multiplier": "Jede Einschaltung über der Schwelle multipliziert die Belegungszeit mit diesem Faktor (Faktor = Multiplikator ^ überzählige Einschaltungen). Beispiel: 1,5 bei 2 überzähligen Einschaltungen → ×2,25.",
+          "adaptive_max_factor": "Obergrenze der Verlängerung (z. B. 4,0 → höchstens 4× die Belegungszeit). Bei jedem normalen Ablauf der Belegungszeit wird der überzählige Anteil des Faktors halbiert.",
+          "lux_hysteresis_pct": "Abschaltung bei Tageslicht: Ist das Licht im Normalprofil an und übersteigt das Umgebungslicht Schwelle × (1 + Spanne/100), schaltet es aus, auch wenn der Bereich belegt ist (z. B. Rollläden geöffnet).",
+          "lux_hysteresis_time": "Sekunden, die der Messwert über der Spanne bleiben muss, bevor wegen Tageslicht abgeschaltet wird, um kurze Spitzen zu ignorieren."
+        }
+      },
+      "profiles": {
+        "title": "Helligkeitsprofile",
+        "description": "Helligkeit beim automatischen Einschalten: Normalprofil oder Sanftprofil (z. B. nachts), gewählt nach Zeitraum oder über eine Entität.",
+        "data": {
+          "brightness_normal": "Normale Helligkeit",
+          "brightness_soft": "Sanfte Helligkeit",
+          "profile_mode": "Aktivierung Sanftprofil",
+          "soft_time_start": "Beginn Sanftprofil",
+          "soft_time_end": "Ende Sanftprofil",
+          "soft_entity": "Sanftprofil-Entität"
+        },
+        "data_description": {
+          "brightness_normal": "Helligkeit (1–255) des Normalprofils. 255 = 100 %.",
+          "brightness_soft": "Helligkeit (1–255) bei aktivem Sanftprofil, z. B. nachts. 100 ≈ 40 %.",
+          "profile_mode": "Wie das Sanftprofil gewählt wird: „Zeitraum“ nutzt Beginn und Ende unten; „Entität“ folgt der Sanftprofil-Entität.",
+          "soft_time_start": "Nur im Modus Zeitraum. Uhrzeit, zu der das Sanftprofil beginnt. Zeiträume über Mitternacht sind möglich (z. B. 20:00–08:00).",
+          "soft_time_end": "Nur im Modus Zeitraum. Uhrzeit, zu der das Sanftprofil endet.",
+          "soft_entity": "Nur im Modus Entität. binary_sensor oder input_boolean: Solange aktiv, ist das Sanftprofil aktiv (z. B. ein Helfer „Nachtmodus“)."
+        }
+      }
+    },
+    "error": {
+      "at_least_one_actuator": "Mindestens ein Aktor ist erforderlich: smarte Lampen oder Relais."
+    }
+  },
+  "selector": {
+    "profile_mode": {
+      "options": {
+        "time": "Zeitraum",
+        "entity": "Entität"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "occupancy_timer": {
+        "name": "Belegungs-Timer"
+      },
+      "failsafe_timer": {
+        "name": "Sicherheits-Timer"
+      },
+      "override_timer": {
+        "name": "Übersteuerungs-Timer"
+      },
+      "warning_timer": {
+        "name": "Vorwarnungs-Timer"
+      },
+      "profile": {
+        "name": "Profil"
+      },
+      "state": {
+        "name": "Zustand"
+      },
+      "adaptive_factor": {
+        "name": "Adaptiver Faktor"
+      },
+      "activation_count": {
+        "name": "Anzahl Einschaltungen"
+      },
+      "lux": {
+        "name": "Lux"
+      }
+    },
+    "number": {
+      "occupancy_timeout": {
+        "name": "Belegungszeit"
+      },
+      "failsafe_timeout": {
+        "name": "Sicherheitszeit"
+      },
+      "perm_override_timeout": {
+        "name": "Dauer permanente Übersteuerung"
+      },
+      "temp_override_timeout": {
+        "name": "Dauer temporäre Übersteuerung"
+      },
+      "warning_dim_pct": {
+        "name": "Vorwarnung Helligkeit"
+      },
+      "warning_dim_duration": {
+        "name": "Vorwarnung Dauer"
+      },
+      "lux_threshold": {
+        "name": "Lux-Schwelle"
+      },
+      "adaptive_window": {
+        "name": "Adaptives Fenster"
+      },
+      "adaptive_threshold": {
+        "name": "Adaptive Schwelle"
+      },
+      "adaptive_multiplier": {
+        "name": "Adaptiver Multiplikator"
+      },
+      "adaptive_max_factor": {
+        "name": "Maximaler adaptiver Faktor"
+      },
+      "lux_hysteresis_pct": {
+        "name": "Tageslicht-Spanne"
+      },
+      "lux_hysteresis_time": {
+        "name": "Tageslicht-Verzögerung"
+      }
+    },
+    "button": {
+      "set_lux_threshold": {
+        "name": "Lux-Schwelle setzen"
+      }
+    }
+  }
+}

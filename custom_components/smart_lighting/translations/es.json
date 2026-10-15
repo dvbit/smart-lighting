@@ -2,133 +2,296 @@
   "config": {
     "step": {
       "user": {
-        "title": "Selección de área",
-        "description": "Seleccione el área de Home Assistant a configurar.",
+        "title": "Área",
+        "description": "Elige el área de Home Assistant que gestiona este controlador. Los pasos siguientes solo muestran entidades asignadas a esta área.",
         "data": {
           "area_id": "Área"
+        },
+        "data_description": {
+          "area_id": "Área de Home Assistant gestionada por este controlador. Su nombre pasa a ser el nombre del dispositivo; los selectores de los pasos siguientes se filtran por ella."
         }
       },
       "sensors": {
         "title": "Sensores",
-        "description": "Seleccione los sensores para esta área.",
+        "description": "Sensores de presencia y de luz ambiente que gobiernan la automatización. Los sensores de movimiento, ocupación y luminosidad son obligatorios.",
         "data": {
           "motion_sensors": "Sensores de movimiento",
           "occupancy_sensor": "Sensor de ocupación",
           "lux_sensor": "Sensor de luminosidad",
-          "lux_threshold": "Umbral de luminosidad"
+          "lux_threshold": "Umbral lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Uno o más binary_sensor (p. ej. PIR). Basta con que uno se active (lógica O) para encender la luz, si la luz ambiente está por debajo del umbral lux. Cada movimiento también reinicia la cuenta atrás de ocupación y el temporizador de seguridad, y cancela el aviso previo.",
+          "occupancy_sensor": "Binary_sensor de presencia estática (p. ej. mmWave). Mientras está activo, la cuenta atrás de apagado queda en espera; al desactivarse, empieza el tiempo de ocupación. También decide si el área sigue ocupada al vencer una anulación temporal.",
+          "lux_sensor": "Sensor de luz ambiente en lux. La luz solo se enciende si la lectura está por debajo del umbral lux. Si no está disponible o no es numérico, el área se considera oscura.",
+          "lux_threshold": "Nivel de luz ambiente por debajo del cual el movimiento enciende la luz. Si la luz está encendida, la lectura alcanza este valor y la ocupación está inactiva, la luz se apaga. Consejo: el botón «Fijar umbral lux» guarda la lectura actual."
         }
       },
       "actuators": {
         "title": "Actuadores",
-        "description": "Configure las entidades de luz y relé. Se requiere al menos uno.",
+        "description": "Entidades que el controlador acciona, más las entradas opcionales de anulación y suspensión. Se requiere al menos una entre bombillas inteligentes y relé.",
         "data": {
-          "bulb_entity": "Bombillas inteligentes (opcional)",
-          "relay_entity": "Relé (opcional)",
-          "soft_bulb_entity": "Bombillas perfil suave (opcional)",
-          "soft_relay_entity": "Relé perfil suave (opcional)",
-          "suspend_entity": "Entidad de suspensión (opcional)",
-          "physical_interaction_sensor": "Sensor interacción física (opcional)"
+          "bulb_entity": "Bombillas inteligentes",
+          "relay_entity": "Relé",
+          "physical_interaction_sensor": "Sensor de interacción física",
+          "soft_bulb_entity": "Bombillas perfil suave",
+          "soft_relay_entity": "Relé perfil suave",
+          "suspend_entity": "Entidad de suspensión"
+        },
+        "data_description": {
+          "bulb_entity": "Opcional. Una o más entidades light, encendidas todas con el brillo del perfil activo. Si también hay un relé, al apagar solo se apagan las bombillas y el relé queda encendido para que sigan accesibles.",
+          "relay_entity": "Switch opcional que alimenta el circuito. Sin bombillas se enciende/apaga directamente. Con bombillas se enciende con ellas y se deja encendido al apagar; solo la seguridad lo apaga.",
+          "physical_interaction_sensor": "Binary_sensor opcional de la integración whodidit. Al cerrarse la ventana de clics (on → off) se lee el atributo click_count: 1 clic = anulación temporal, 2 clics = entrar/salir de la anulación permanente, 3 o más = ignorados.",
+          "soft_bulb_entity": "Opcional. Entidades light usadas en lugar de las bombillas inteligentes cuando el perfil suave está activo (p. ej. una lámpara nocturna). Sin bombillas ni relé suaves, se usan los actuadores normales.",
+          "soft_relay_entity": "Opcional. Switch usado en lugar del relé cuando el perfil suave está activo. Mismas reglas que el relé principal.",
+          "suspend_entity": "Binary_sensor o input_boolean opcional. Mientras está activa, la automatización se pausa: temporizadores cancelados, luz sin cambios y eventos ignorados (p. ej. modo cine). Al desactivarse se reevalúan movimiento y lux."
         }
       },
       "timings": {
-        "title": "Temporizaciones",
-        "description": "Configure los tiempos de espera y advertencia.",
+        "title": "Tiempos",
+        "description": "Temporizadores de apagado, aviso previo, tiempo adaptativo y apagado por luz natural. Cada valor se puede cambiar después desde las entidades número del dispositivo, sin reconfigurar.",
         "data": {
-          "occupancy_timeout": "Timeout presencia — segundos desde el último movimiento antes de la atenuación",
-          "failsafe_timeout": "Timeout seguridad — segundos sin movimiento antes del apagado forzado (reinicia en cada movimiento)",
-          "adaptive_window": "Ventana adaptativa — ventana deslizante (s) para contar activaciones",
-          "adaptive_threshold": "Umbral adaptativo — activaciones en ventana antes de extender timeout",
-          "adaptive_multiplier": "Multiplicador adaptativo — factor por activación extra (ej. 1.5 = 50% más)",
-          "adaptive_max_factor": "Factor máx adaptativo — límite de extensión (ej. 4.0 = 4× máximo)",
-          "perm_override_timeout": "Timeout override permanente — salida automática tras N segundos (0 = nunca expira)",
-          "lux_hysteresis_pct": "Histéresis lux % — la lux debe superar el umbral en este % para activar el apagado por luz natural",
-          "lux_hysteresis_time": "Tiempo histéresis lux — segundos que la lux debe permanecer alta antes del apagado",
-          "temp_override_timeout": "Timeout override temporal — retorno automático tras N segundos de inactividad (0 = nunca, hasta siguiente clic)",
-          "warning_dim_pct": "Atenuación aviso % — brillo durante la atenuación previa al apagado (ej. 30 = 30%)",
-          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)"
+          "occupancy_timeout": "Tiempo de ocupación (s)",
+          "failsafe_timeout": "Tiempo de seguridad (s)",
+          "perm_override_timeout": "Tiempo anulación permanente (s)",
+          "temp_override_timeout": "Tiempo anulación temporal (s)",
+          "warning_dim_pct": "Aviso: brillo (%)",
+          "warning_dim_duration": "Aviso: duración (s)",
+          "adaptive_window": "Ventana adaptativa (s)",
+          "adaptive_threshold": "Umbral adaptativo",
+          "adaptive_multiplier": "Multiplicador adaptativo",
+          "adaptive_max_factor": "Factor adaptativo máximo",
+          "lux_hysteresis_pct": "Margen luz natural (%)",
+          "lux_hysteresis_time": "Retardo luz natural (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Cuenta atrás antes del apagado. Empieza cuando termina la presencia (ocupación inactiva, o movimiento inactivo si no hay sensor de ocupación), se reinicia con cada movimiento y se cancela si vuelve la ocupación. Al vencer empieza el aviso previo. Se multiplica por el factor adaptativo en zonas de paso.",
+          "failsafe_timeout": "Red de seguridad: sin movimiento durante este tiempo se apaga todo, relé incluido (protege ante un sensor de ocupación bloqueado). Se reinicia con cada movimiento. Se ignora en anulación permanente.",
+          "perm_override_timeout": "Duración máxima de la anulación permanente (doble clic). Al vencer, la luz se apaga y vuelve el modo automático.",
+          "temp_override_timeout": "En anulación temporal (clic simple) cada clic invierte la luz y reinicia este temporizador. Al vencer vuelve el modo automático: encendida si el área está ocupada y oscura, si no apagada. 0 = nunca vence por sí sola.",
+          "warning_dim_pct": "Antes de apagar, las bombillas bajan a este porcentaje del brillo actual para avisar a quien siga en la sala. Cualquier movimiento u ocupación cancela el aviso y restaura el brillo. Solo es efectivo con bombillas inteligentes.",
+          "warning_dim_duration": "Tiempo que la luz permanece atenuada antes de apagarse.",
+          "adaptive_window": "Ventana de tiempo móvil en la que se cuentan los encendidos automáticos para detectar una zona de paso.",
+          "adaptive_threshold": "Número de encendidos en la ventana a partir del cual el tiempo de ocupación empieza a alargarse.",
+          "adaptive_multiplier": "Cada encendido por encima del umbral multiplica el tiempo de ocupación por este factor (factor = multiplicador ^ encendidos en exceso). Ejemplo: 1,5 con 2 encendidos en exceso → ×2,25.",
+          "adaptive_max_factor": "Límite superior del alargamiento (p. ej. 4,0 → como máximo 4× el tiempo de ocupación). Cada vez que el tiempo vence con normalidad, la parte en exceso del factor se reduce a la mitad.",
+          "lux_hysteresis_pct": "Apagado por luz natural: con la luz encendida en perfil normal, si la luz ambiente supera umbral × (1 + margen/100) la luz se apaga aunque el área esté ocupada (p. ej. persianas abiertas).",
+          "lux_hysteresis_time": "Segundos que la lectura debe permanecer por encima del margen antes del apagado, para ignorar picos breves."
         }
       },
       "profiles": {
         "title": "Perfiles de brillo",
-        "description": "Configure los perfiles de brillo normal y suave.",
+        "description": "Brillo usado en el encendido automático: perfil normal, o perfil suave (p. ej. de noche) elegido por franja horaria o por una entidad.",
         "data": {
           "brightness_normal": "Brillo normal",
           "brightness_soft": "Brillo suave",
           "profile_mode": "Activación del perfil suave",
-          "soft_time_start": "Inicio franja suave",
-          "soft_time_end": "Fin franja suave",
+          "soft_time_start": "Inicio perfil suave",
+          "soft_time_end": "Fin perfil suave",
           "soft_entity": "Entidad perfil suave"
+        },
+        "data_description": {
+          "brightness_normal": "Brillo (1–255) del perfil normal. 255 = 100 %.",
+          "brightness_soft": "Brillo (1–255) usado cuando el perfil suave está activo, p. ej. de noche. 100 ≈ 40 %.",
+          "profile_mode": "Cómo se elige el perfil suave: «Franja horaria» usa el inicio y fin de abajo; «Entidad» sigue la entidad del perfil suave.",
+          "soft_time_start": "Solo en modo franja horaria. Hora de inicio del perfil suave. Se admiten franjas que cruzan la medianoche (p. ej. 20:00–08:00).",
+          "soft_time_end": "Solo en modo franja horaria. Hora de fin del perfil suave.",
+          "soft_entity": "Solo en modo entidad. Binary_sensor o input_boolean: mientras está activo, el perfil suave está activo (p. ej. un ayudante «modo noche»)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "Se requiere al menos un actuador (bombilla o relé)."
+      "at_least_one_actuator": "Se requiere al menos un actuador: bombillas inteligentes o relé."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Selección de área",
-        "description": "Cambiar el área configurada.",
+        "title": "Área",
+        "description": "Elige el área de Home Assistant que gestiona este controlador. Los pasos siguientes solo muestran entidades asignadas a esta área. Al guardar se recarga la integración y se reinician todos los temporizadores.",
         "data": {
           "area_id": "Área"
+        },
+        "data_description": {
+          "area_id": "Área de Home Assistant gestionada por este controlador. Su nombre pasa a ser el nombre del dispositivo; los selectores de los pasos siguientes se filtran por ella."
         }
       },
       "sensors": {
         "title": "Sensores",
-        "description": "Actualizar sensores.",
+        "description": "Sensores de presencia y de luz ambiente que gobiernan la automatización. Los sensores de movimiento, ocupación y luminosidad son obligatorios.",
         "data": {
           "motion_sensors": "Sensores de movimiento",
           "occupancy_sensor": "Sensor de ocupación",
           "lux_sensor": "Sensor de luminosidad",
-          "lux_threshold": "Umbral de luminosidad"
+          "lux_threshold": "Umbral lux (lx)"
+        },
+        "data_description": {
+          "motion_sensors": "Uno o más binary_sensor (p. ej. PIR). Basta con que uno se active (lógica O) para encender la luz, si la luz ambiente está por debajo del umbral lux. Cada movimiento también reinicia la cuenta atrás de ocupación y el temporizador de seguridad, y cancela el aviso previo.",
+          "occupancy_sensor": "Binary_sensor de presencia estática (p. ej. mmWave). Mientras está activo, la cuenta atrás de apagado queda en espera; al desactivarse, empieza el tiempo de ocupación. También decide si el área sigue ocupada al vencer una anulación temporal.",
+          "lux_sensor": "Sensor de luz ambiente en lux. La luz solo se enciende si la lectura está por debajo del umbral lux. Si no está disponible o no es numérico, el área se considera oscura.",
+          "lux_threshold": "Nivel de luz ambiente por debajo del cual el movimiento enciende la luz. Si la luz está encendida, la lectura alcanza este valor y la ocupación está inactiva, la luz se apaga. Consejo: el botón «Fijar umbral lux» guarda la lectura actual."
         }
       },
       "actuators": {
         "title": "Actuadores",
-        "description": "Actualizar entidades.",
+        "description": "Entidades que el controlador acciona, más las entradas opcionales de anulación y suspensión. Se requiere al menos una entre bombillas inteligentes y relé.",
         "data": {
-          "bulb_entity": "Bombillas inteligentes (opcional)",
-          "relay_entity": "Relé (opcional)",
-          "soft_bulb_entity": "Bombillas perfil suave (opcional)",
-          "soft_relay_entity": "Relé perfil suave (opcional)",
-          "suspend_entity": "Entidad de suspensión (opcional)",
-          "physical_interaction_sensor": "Sensor interacción física (opcional)"
+          "bulb_entity": "Bombillas inteligentes",
+          "relay_entity": "Relé",
+          "physical_interaction_sensor": "Sensor de interacción física",
+          "soft_bulb_entity": "Bombillas perfil suave",
+          "soft_relay_entity": "Relé perfil suave",
+          "suspend_entity": "Entidad de suspensión"
+        },
+        "data_description": {
+          "bulb_entity": "Opcional. Una o más entidades light, encendidas todas con el brillo del perfil activo. Si también hay un relé, al apagar solo se apagan las bombillas y el relé queda encendido para que sigan accesibles.",
+          "relay_entity": "Switch opcional que alimenta el circuito. Sin bombillas se enciende/apaga directamente. Con bombillas se enciende con ellas y se deja encendido al apagar; solo la seguridad lo apaga.",
+          "physical_interaction_sensor": "Binary_sensor opcional de la integración whodidit. Al cerrarse la ventana de clics (on → off) se lee el atributo click_count: 1 clic = anulación temporal, 2 clics = entrar/salir de la anulación permanente, 3 o más = ignorados.",
+          "soft_bulb_entity": "Opcional. Entidades light usadas en lugar de las bombillas inteligentes cuando el perfil suave está activo (p. ej. una lámpara nocturna). Sin bombillas ni relé suaves, se usan los actuadores normales.",
+          "soft_relay_entity": "Opcional. Switch usado en lugar del relé cuando el perfil suave está activo. Mismas reglas que el relé principal.",
+          "suspend_entity": "Binary_sensor o input_boolean opcional. Mientras está activa, la automatización se pausa: temporizadores cancelados, luz sin cambios y eventos ignorados (p. ej. modo cine). Al desactivarse se reevalúan movimiento y lux."
         }
       },
       "timings": {
-        "title": "Temporizaciones",
-        "description": "Actualizar tiempos.",
+        "title": "Tiempos",
+        "description": "Temporizadores de apagado, aviso previo, tiempo adaptativo y apagado por luz natural. Cada valor se puede cambiar después desde las entidades número del dispositivo, sin reconfigurar.",
         "data": {
-          "occupancy_timeout": "Timeout presencia — segundos desde el último movimiento antes de la atenuación",
-          "failsafe_timeout": "Timeout seguridad — segundos sin movimiento antes del apagado forzado (reinicia en cada movimiento)",
-          "adaptive_window": "Ventana adaptativa — ventana deslizante (s) para contar activaciones",
-          "adaptive_threshold": "Umbral adaptativo — activaciones en ventana antes de extender timeout",
-          "adaptive_multiplier": "Multiplicador adaptativo — factor por activación extra (ej. 1.5 = 50% más)",
-          "adaptive_max_factor": "Factor máx adaptativo — límite de extensión (ej. 4.0 = 4× máximo)",
-          "perm_override_timeout": "Timeout override permanente — salida automática tras N segundos (0 = nunca expira)",
-          "lux_hysteresis_pct": "Histéresis lux % — la lux debe superar el umbral en este % para activar el apagado por luz natural",
-          "lux_hysteresis_time": "Tiempo histéresis lux — segundos que la lux debe permanecer alta antes del apagado",
-          "temp_override_timeout": "Timeout override temporal — retorno automático tras N segundos de inactividad (0 = nunca, hasta siguiente clic)",
-          "warning_dim_pct": "Atenuación aviso % — brillo durante la atenuación previa al apagado (ej. 30 = 30%)",
-          "warning_dim_duration": "Duración atenuación — segundos de atenuación antes del apagado (0 = apagado inmediato)"
+          "occupancy_timeout": "Tiempo de ocupación (s)",
+          "failsafe_timeout": "Tiempo de seguridad (s)",
+          "perm_override_timeout": "Tiempo anulación permanente (s)",
+          "temp_override_timeout": "Tiempo anulación temporal (s)",
+          "warning_dim_pct": "Aviso: brillo (%)",
+          "warning_dim_duration": "Aviso: duración (s)",
+          "adaptive_window": "Ventana adaptativa (s)",
+          "adaptive_threshold": "Umbral adaptativo",
+          "adaptive_multiplier": "Multiplicador adaptativo",
+          "adaptive_max_factor": "Factor adaptativo máximo",
+          "lux_hysteresis_pct": "Margen luz natural (%)",
+          "lux_hysteresis_time": "Retardo luz natural (s)"
+        },
+        "data_description": {
+          "occupancy_timeout": "Cuenta atrás antes del apagado. Empieza cuando termina la presencia (ocupación inactiva, o movimiento inactivo si no hay sensor de ocupación), se reinicia con cada movimiento y se cancela si vuelve la ocupación. Al vencer empieza el aviso previo. Se multiplica por el factor adaptativo en zonas de paso.",
+          "failsafe_timeout": "Red de seguridad: sin movimiento durante este tiempo se apaga todo, relé incluido (protege ante un sensor de ocupación bloqueado). Se reinicia con cada movimiento. Se ignora en anulación permanente.",
+          "perm_override_timeout": "Duración máxima de la anulación permanente (doble clic). Al vencer, la luz se apaga y vuelve el modo automático.",
+          "temp_override_timeout": "En anulación temporal (clic simple) cada clic invierte la luz y reinicia este temporizador. Al vencer vuelve el modo automático: encendida si el área está ocupada y oscura, si no apagada. 0 = nunca vence por sí sola.",
+          "warning_dim_pct": "Antes de apagar, las bombillas bajan a este porcentaje del brillo actual para avisar a quien siga en la sala. Cualquier movimiento u ocupación cancela el aviso y restaura el brillo. Solo es efectivo con bombillas inteligentes.",
+          "warning_dim_duration": "Tiempo que la luz permanece atenuada antes de apagarse.",
+          "adaptive_window": "Ventana de tiempo móvil en la que se cuentan los encendidos automáticos para detectar una zona de paso.",
+          "adaptive_threshold": "Número de encendidos en la ventana a partir del cual el tiempo de ocupación empieza a alargarse.",
+          "adaptive_multiplier": "Cada encendido por encima del umbral multiplica el tiempo de ocupación por este factor (factor = multiplicador ^ encendidos en exceso). Ejemplo: 1,5 con 2 encendidos en exceso → ×2,25.",
+          "adaptive_max_factor": "Límite superior del alargamiento (p. ej. 4,0 → como máximo 4× el tiempo de ocupación). Cada vez que el tiempo vence con normalidad, la parte en exceso del factor se reduce a la mitad.",
+          "lux_hysteresis_pct": "Apagado por luz natural: con la luz encendida en perfil normal, si la luz ambiente supera umbral × (1 + margen/100) la luz se apaga aunque el área esté ocupada (p. ej. persianas abiertas).",
+          "lux_hysteresis_time": "Segundos que la lectura debe permanecer por encima del margen antes del apagado, para ignorar picos breves."
         }
       },
       "profiles": {
         "title": "Perfiles de brillo",
-        "description": "Actualizar perfiles.",
+        "description": "Brillo usado en el encendido automático: perfil normal, o perfil suave (p. ej. de noche) elegido por franja horaria o por una entidad.",
         "data": {
           "brightness_normal": "Brillo normal",
           "brightness_soft": "Brillo suave",
           "profile_mode": "Activación del perfil suave",
-          "soft_time_start": "Inicio franja suave",
-          "soft_time_end": "Fin franja suave",
+          "soft_time_start": "Inicio perfil suave",
+          "soft_time_end": "Fin perfil suave",
           "soft_entity": "Entidad perfil suave"
+        },
+        "data_description": {
+          "brightness_normal": "Brillo (1–255) del perfil normal. 255 = 100 %.",
+          "brightness_soft": "Brillo (1–255) usado cuando el perfil suave está activo, p. ej. de noche. 100 ≈ 40 %.",
+          "profile_mode": "Cómo se elige el perfil suave: «Franja horaria» usa el inicio y fin de abajo; «Entidad» sigue la entidad del perfil suave.",
+          "soft_time_start": "Solo en modo franja horaria. Hora de inicio del perfil suave. Se admiten franjas que cruzan la medianoche (p. ej. 20:00–08:00).",
+          "soft_time_end": "Solo en modo franja horaria. Hora de fin del perfil suave.",
+          "soft_entity": "Solo en modo entidad. Binary_sensor o input_boolean: mientras está activo, el perfil suave está activo (p. ej. un ayudante «modo noche»)."
         }
       }
     },
     "error": {
-      "at_least_one_actuator": "Se requiere al menos un actuador (bombilla o relé)."
+      "at_least_one_actuator": "Se requiere al menos un actuador: bombillas inteligentes o relé."
+    }
+  },
+  "selector": {
+    "profile_mode": {
+      "options": {
+        "time": "Franja horaria",
+        "entity": "Entidad"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "occupancy_timer": {
+        "name": "Temporizador de ocupación"
+      },
+      "failsafe_timer": {
+        "name": "Temporizador de seguridad"
+      },
+      "override_timer": {
+        "name": "Temporizador de anulación"
+      },
+      "warning_timer": {
+        "name": "Temporizador de aviso"
+      },
+      "profile": {
+        "name": "Perfil"
+      },
+      "state": {
+        "name": "Estado"
+      },
+      "adaptive_factor": {
+        "name": "Factor adaptativo"
+      },
+      "activation_count": {
+        "name": "Recuento de encendidos"
+      },
+      "lux": {
+        "name": "Lux"
+      }
+    },
+    "number": {
+      "occupancy_timeout": {
+        "name": "Tiempo de ocupación"
+      },
+      "failsafe_timeout": {
+        "name": "Tiempo de seguridad"
+      },
+      "perm_override_timeout": {
+        "name": "Tiempo anulación permanente"
+      },
+      "temp_override_timeout": {
+        "name": "Tiempo anulación temporal"
+      },
+      "warning_dim_pct": {
+        "name": "Aviso brillo"
+      },
+      "warning_dim_duration": {
+        "name": "Aviso duración"
+      },
+      "lux_threshold": {
+        "name": "Umbral lux"
+      },
+      "adaptive_window": {
+        "name": "Ventana adaptativa"
+      },
+      "adaptive_threshold": {
+        "name": "Umbral adaptativo"
+      },
+      "adaptive_multiplier": {
+        "name": "Multiplicador adaptativo"
+      },
+      "adaptive_max_factor": {
+        "name": "Factor adaptativo máximo"
+      },
+      "lux_hysteresis_pct": {
+        "name": "Margen luz natural"
+      },
+      "lux_hysteresis_time": {
+        "name": "Retardo luz natural"
+      }
+    },
+    "button": {
+      "set_lux_threshold": {
+        "name": "Fijar umbral lux"
+      }
     }
   }
 }

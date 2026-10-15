@@ -34,7 +34,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="occupancy_timeout",
-            name="Occupancy Timeout",
             prop_name="runtime_occupancy_timeout",
             min_value=10, max_value=7200, step=10,
             unit=UnitOfTime.SECONDS,
@@ -42,7 +41,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="failsafe_timeout",
-            name="Failsafe Timeout",
             prop_name="runtime_failsafe_timeout",
             min_value=60, max_value=86400, step=60,
             unit=UnitOfTime.SECONDS,
@@ -50,7 +48,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="perm_override_timeout",
-            name="Perm Override Timeout",
             prop_name="runtime_perm_override_timeout",
             min_value=60, max_value=86400, step=60,
             unit=UnitOfTime.SECONDS,
@@ -58,7 +55,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="temp_override_timeout",
-            name="Temp Override Timeout",
             prop_name="runtime_temp_override_timeout",
             min_value=0, max_value=86400, step=60,
             unit=UnitOfTime.SECONDS,
@@ -66,7 +62,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="warning_dim_pct",
-            name="Warning Dim Pct",
             prop_name="runtime_warning_dim_pct",
             min_value=5, max_value=80, step=5,
             unit="%",
@@ -74,7 +69,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="warning_dim_duration",
-            name="Warning Dim Duration",
             prop_name="runtime_warning_dim_duration",
             min_value=3, max_value=60, step=1,
             unit=UnitOfTime.SECONDS,
@@ -82,7 +76,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="lux_threshold",
-            name="Lux Threshold",
             prop_name="runtime_lux_threshold",
             min_value=0, max_value=1000, step=1,
             unit="lx",
@@ -90,7 +83,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="adaptive_window",
-            name="Adaptive Window",
             prop_name="runtime_adaptive_window",
             min_value=60, max_value=3600, step=60,
             unit=UnitOfTime.SECONDS,
@@ -98,7 +90,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="adaptive_threshold",
-            name="Adaptive Threshold",
             prop_name="runtime_adaptive_threshold",
             min_value=2, max_value=20, step=1,
             unit=None,
@@ -106,7 +97,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="adaptive_multiplier",
-            name="Adaptive Multiplier",
             prop_name="runtime_adaptive_multiplier",
             min_value=1.1, max_value=3.0, step=0.1,
             unit=None,
@@ -114,7 +104,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="adaptive_max_factor",
-            name="Adaptive Max Factor",
             prop_name="runtime_adaptive_max_factor",
             min_value=1.5, max_value=10.0, step=0.5,
             unit=None,
@@ -122,7 +111,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="lux_hysteresis_pct",
-            name="Lux Hysteresis Pct",
             prop_name="runtime_lux_hysteresis_pct",
             min_value=5, max_value=100, step=1,
             unit="%",
@@ -130,7 +118,6 @@ async def async_setup_entry(
         SmartLightingNumber(
             coordinator, entry, area_name,
             key="lux_hysteresis_time",
-            name="Lux Hysteresis Time",
             prop_name="runtime_lux_hysteresis_time",
             min_value=1, max_value=30, step=1,
             unit=UnitOfTime.SECONDS,
@@ -159,7 +146,6 @@ class SmartLightingNumber(NumberEntity):
         entry: ConfigEntry,
         area_name: str,
         key: str,
-        name: str,
         prop_name: str,
         min_value: float,
         max_value: float,
@@ -173,7 +159,6 @@ class SmartLightingNumber(NumberEntity):
             entry: Config entry (for persistence).
             area_name: Area display name.
             key: Unique key suffix — also used as config entry data key.
-            name: Human-readable entity name.
             prop_name: Coordinator property name to read/write.
             min_value: Minimum allowed value.
             max_value: Maximum allowed value.
@@ -186,7 +171,8 @@ class SmartLightingNumber(NumberEntity):
         self._config_key = key  # matches CONF_* key name
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
-        self._attr_name = name
+        # Display name from translations: entity.number.<key> [Spec §13]
+        self._attr_translation_key = key
         self._attr_device_info = coordinator.device_info
         self._attr_native_min_value = min_value
         self._attr_native_max_value = max_value

@@ -457,15 +457,9 @@ class SmartLightingConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_PROFILE_MODE, default=PROFILE_MODE_TIME
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=[
-                                selector.SelectOptionDict(
-                                    value=PROFILE_MODE_TIME, label="Time range"
-                                ),
-                                selector.SelectOptionDict(
-                                    value=PROFILE_MODE_ENTITY,
-                                    label="Entity",
-                                ),
-                            ],
+                            options=[PROFILE_MODE_TIME, PROFILE_MODE_ENTITY],
+                            # Labels from translations: selector.profile_mode [Spec §12]
+                            translation_key=CONF_PROFILE_MODE,
                             mode="dropdown",
                         )
                     ),
@@ -937,15 +931,9 @@ class SmartLightingOptionsFlow(OptionsFlow):
                         ),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=[
-                                selector.SelectOptionDict(
-                                    value=PROFILE_MODE_TIME, label="Time range"
-                                ),
-                                selector.SelectOptionDict(
-                                    value=PROFILE_MODE_ENTITY,
-                                    label="Entity",
-                                ),
-                            ],
+                            options=[PROFILE_MODE_TIME, PROFILE_MODE_ENTITY],
+                            # Labels from translations: selector.profile_mode [Spec §12]
+                            translation_key=CONF_PROFILE_MODE,
                             mode="dropdown",
                         )
                     ),

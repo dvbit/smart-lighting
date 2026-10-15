@@ -63,7 +63,8 @@ class SmartLightingSetLuxThresholdButton(ButtonEntity):
         self._entry = entry
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_set_lux_threshold"
-        self._attr_name = "Set Lux Threshold"
+        # Display name from translations [Spec §13]
+        self._attr_translation_key = "set_lux_threshold"
         self._attr_device_info = coordinator.device_info
 
     async def async_press(self) -> None:
